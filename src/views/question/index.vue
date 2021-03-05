@@ -1,6 +1,6 @@
 <template>
-  <div id="app">
-    <router-view/>
+  <div>
+    question
   </div>
 </template>
 <script>
@@ -13,8 +13,7 @@ export default {
   },
   computed: {},
   watch: {},
-  created () {
-  },
+  created () {},
   mounted () {},
   methods: {}
 }
