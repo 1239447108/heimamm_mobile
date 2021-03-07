@@ -43,11 +43,11 @@ export default {
   }
 }
 </script>
-<style scoped lang='less'>
+<style lang='less'>
   .van-nav-bar{
     .van-nav-bar__content{
-      /deep/ .van-nav-bar__left{
-        padding: 0 !important;
+      .van-nav-bar__left{
+        padding: 0;
       }
     }
   }

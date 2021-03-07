@@ -1,6 +1,11 @@
 import axios from 'axios'
 import { removeToken, getToken } from '@/utils/storage'
 import store from '@/store'
+// import router from '@/router'
+import Vue from 'vue'
+import { Toast } from 'vant'
+
+Vue.use(Toast)
 
 const request = axios.create({
   baseURL: process.env.VUE_APP_BASEURL
@@ -8,11 +13,12 @@ const request = axios.create({
 
 // 请求拦截器
 request.interceptors.request.use(
-  function (config) {
-    if (getToken('hm_m_token')) {
-      config.headers.authorization = `Bearer ${getToken('hm_m_token')}`
+  function (request) {
+    const token = getToken('hm_m_token')
+    if (request.needToken) {
+      request.headers.authorization = `Bearer ${token}`
     }
-    return config
+    return request
   },
   function (err) {
     return Promise.reject(err)
@@ -21,13 +27,18 @@ request.interceptors.request.use(
 
 // 响应拦截器
 request.interceptors.response.use(
-  function (config) {
-    // 如果状态码不为200
-    if (config.status !== 200) {
+  function (response) {
+    const { code } = response.data
+    if (code === 200) {
+      return response
+    }
+    if (code === 400 || code === 401 || code === 403) {
+      Toast.fail(response.data.message)
       removeToken()
       store.commit('setIsLogin', false)
+      // router.push('/login')
     }
-    return config
+    return Promise.reject(new Error(response.data.message))
   },
   function (err) {
     return Promise.reject(err)

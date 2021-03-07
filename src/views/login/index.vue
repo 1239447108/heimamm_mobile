@@ -56,14 +56,10 @@
   </div>
 </template>
 <script>
-import Vue from 'vue'
-import { Toast } from 'vant'
-import { sendCode, login } from '@/api/login'
+import { sendCodeApi, loginApi } from '@/api/login'
 import { setToken } from '@/utils/storage'
 import { mapMutations, mapState } from 'vuex'
 import Back from '@/components/back'
-
-Vue.use(Toast)
 export default {
   name: '',
   components: {
@@ -95,7 +91,7 @@ export default {
       return /^\d{4}$/.test(val)
     },
     send () {
-      Toast.loading({
+      this.$toast.loading({
         message: '加载中...',
         forbidClick: true,
         duration: 0
@@ -103,25 +99,26 @@ export default {
       this.$refs.login_form.validate('mobile')
         .then(async () => {
           this.isSendBtnDisabled = true
-          let num = 59
-          this.sendText = num + 's后重试'
-          const timeId = setInterval(() => {
-            if (num > 0) {
-              num -= 1
-              this.sendText = num + 's后重试'
-            } else {
-              clearInterval(timeId)
-              this.isSendBtnDisabled = false
-              this.sendText = '获取验证码'
-            }
-          }, 1000)
-          const { data: res } = await sendCode({ mobile: this.form.mobile })
+          const { data: res } = await sendCodeApi({ mobile: this.form.mobile })
           // console.log(res)
           if (res.code === 200) {
             this.$toast({
               message: '发送成功,验证码为' + res.data,
               position: 'top'
             })
+            // 开启定时器
+            let num = 59
+            this.sendText = num + 's后重试'
+            const timeId = setInterval(() => {
+              if (num > 0) {
+                num -= 1
+                this.sendText = num + 's后重试'
+              } else {
+                clearInterval(timeId)
+                this.isSendBtnDisabled = false
+                this.sendText = '获取验证码'
+              }
+            }, 1000)
           } else {
             this.$toast({
               message: '发送失败!',
@@ -146,7 +143,7 @@ export default {
         })
     },
     async onLogin () {
-      const { data: res } = await login(this.form)
+      const { data: res } = await loginApi(this.form)
       // console.log(res)
       if (res.code === 200) {
         this.$toast({

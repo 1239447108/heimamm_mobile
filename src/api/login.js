@@ -1,17 +1,19 @@
 import request from '@/utils/request'
 
-export const sendCode = data => {
+export const sendCodeApi = data => {
   return request({
     url: '/au/code',
     method: 'POST',
-    data
+    data,
+    needToken: false
   })
 }
 
-export const login = data => {
+export const loginApi = data => {
   return request({
     url: '/au/login',
     method: 'POST',
-    data
+    data,
+    needToken: false
   })
 }

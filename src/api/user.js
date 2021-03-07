@@ -1,23 +1,26 @@
 import request from '@/utils/request'
 
-export const getUserInfo = () => {
+export const getUserInfoApi = () => {
   return request({
-    url: '/au/info'
+    url: '/au/info',
+    needToken: true
   })
 }
 
-export const uploadAvatar = data => {
+export const uploadAvatarApi = data => {
   return request({
     url: '/upload',
     data,
-    method: 'POST'
+    method: 'POST',
+    needToken: true
   })
 }
 
-export const editUserInfo = data => {
+export const editUserInfoApi = data => {
   return request({
     url: '/au/edit',
     method: 'POST',
-    data
+    data,
+    needToken: true
   })
 }

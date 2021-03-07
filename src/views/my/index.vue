@@ -43,7 +43,7 @@
         </div>
         <div class="count_item">
           <div class="count_item_num">
-            {{ info.submitNum === 0 ? 0 : (info.submitNum - info.errorNum) / info.submitNum * 100 }}%
+            {{ info.submitNum === 0 ? 0 : ((info.submitNum - info.errorNum) / info.submitNum * 100).toFixed(2) }}%
           </div>
           <div class="count_item_text">
             正确率
@@ -54,9 +54,9 @@
     <div class="card">
       <!-- 我的岗位 -->
       <div class="card_myjob">
-        <van-cell title="我的岗位" size='40' :value="info.position" is-link>
+        <van-cell title="我的岗位" @click='editPosition' size='40' :value="info.position" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconicon_mine_gangwei"></i>
           </template>
         </van-cell>
       </div>
@@ -108,32 +108,32 @@
       <div class="card_list">
         <van-cell class="card_list_item" title="我的面经分享" size='40' value="21" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconicon_mine_mianjing"></i>
           </template>
         </van-cell>
         <van-cell class="card_list_item" title="我的消息" size='40' :value="info.systemMessages" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconicon_mine_xiaoxi"></i>
           </template>
         </van-cell>
         <van-cell class="card_list_item" title="收藏的题库" size='40' value="29" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconicon_mine_tikushoucang"></i>
           </template>
         </van-cell>
         <van-cell class="card_list_item" title="收藏的企业" size='40' value="32" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconicon_mine_qiyeshoucang"></i>
           </template>
         </van-cell>
         <van-cell class="card_list_item" title="我的错题" size='40' :value="info.errorQuestions.length" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconicon_mine_cuoti"></i>
           </template>
         </van-cell>
         <van-cell class="card_list_item" title="收藏的面试经验" size='40' value="123" is-link>
           <template #icon>
-            <van-icon class='mright_icon' size='25' name="notes-o" />
+            <i class="mright_icon iconfont iconbtn_shoucang_sel"></i>
           </template>
         </van-cell>
       </div>
@@ -142,7 +142,7 @@
 </template>
 <script>
 import { mapMutations } from 'vuex'
-import { getUserInfo } from '@/api/user'
+import { getUserInfoApi } from '@/api/user'
 import eventbus from '@/utils/eventbus'
 export default {
   name: '',
@@ -173,15 +173,22 @@ export default {
     },
     // 获取用户信息
     async getUserInfo () {
-      const { data: res } = await getUserInfo()
+      const { data: res } = await getUserInfoApi()
       // console.log(res)
       if (res.code === 200) {
+        // 将用户信息保存到vuex里
         this.setUserInfo(res.data)
         this.info = res.data
       } else {
         this.$toast('获取用户信息失败!')
       }
+    },
+    editPosition () {
+      this.$router.push('/editInfo?type=position')
     }
+  },
+  destroyed () {
+    eventbus.$off('get-userinfo')
   }
 }
 </script>
@@ -236,6 +243,7 @@ export default {
           margin-bottom: 10px;
         }
         .count_item_text{
+          color: #fff;
           font-size: 12px;
           font-family: PingFangSC;
           opacity: 0.7;
@@ -254,8 +262,10 @@ export default {
     border-radius: 10px;
     overflow: hidden;
     padding-top: 5px;
+    // 图标样式
     .mright_icon{
       margin-right: 10px;
+      font-size: 20px;
     }
     .card_myjob{
       border-radius: 10px;
