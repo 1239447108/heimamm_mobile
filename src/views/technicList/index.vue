@@ -13,7 +13,7 @@
 </template>
 <script>
 import Back from '@/components/back'
-import { getTechnicList } from '@/api/find'
+import { getTechnicListApi } from '@/api/find'
 import findTechnic from '@/components/findTechnic'
 export default {
   name: '',
@@ -30,7 +30,7 @@ export default {
   computed: {},
   watch: {},
   created () {
-    getTechnicList({ limit: 10 })
+    getTechnicListApi({ limit: 10 })
       .then(res => {
         // console.log(res.data)
         if (res.data.code === 200) {

@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import { getUserInfoApi } from '@/api/user'
 
 Vue.use(Vuex)
 
@@ -7,8 +8,7 @@ export default new Vuex.Store({
   state: {
     isLogin: false,
     userInfo: null,
-    // 登录之前的地址
-    prevUrl: '',
+    // 底部tabbar是否显示
     isTabbarShow: false
   },
   mutations: {
@@ -18,14 +18,19 @@ export default new Vuex.Store({
     setUserInfo (state, info) {
       state.userInfo = info
     },
-    setPrevUrl (state, url) {
-      state.prevUrl = url
-    },
     setIsTabbarShow (state, isshow) {
       state.isTabbarShow = isshow
     }
   },
   actions: {
+    async getUserInfoByVuex (store) {
+      try {
+        const { data: res } = await getUserInfoApi()
+        store.commit('setUserInfo', res.data)
+      } catch (err) {
+        console.log(err)
+      }
+    }
   },
   modules: {
   }

@@ -13,9 +13,8 @@
 </template>
 <script>
 import Back from '@/components/back'
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { uploadAvatarApi, editUserInfoApi } from '@/api/user'
-import eventbus from '@/utils/eventbus'
 export default {
   name: '',
   components: {
@@ -46,9 +45,10 @@ export default {
   },
   mounted () {},
   methods: {
+    ...mapActions(['getUserInfoByVuex']),
     // 图片超出限制大小时触发
     onOversize (file) {
-      // console.log(file)
+      console.log(file)
       this.$toast('图片大小不能超过2M哦!')
     },
     // 图片上传之前触发
@@ -68,7 +68,7 @@ export default {
       try {
         formData.append('files', file.file)
         const { data: res } = await uploadAvatarApi(formData)
-        console.log(res)
+        // console.log(res)
         if (res.code === 200) {
           file.status = 'done'
           file.message = '上传成功!'
@@ -82,17 +82,19 @@ export default {
     },
     // 点击保存
     async save () {
+      // 修改头像
       if (this.type === 'avatar') {
-        const { data: res } = await editUserInfoApi({ avatar: this.avatarId })
-        // console.log(res)
-        if (res.code === 200) {
+        try {
+          await editUserInfoApi({ avatar: this.avatarId })
           this.$toast('修改成功!')
-          eventbus.$emit('get-userinfo')
-          return this.$router.back()
-        } else {
-          return this.$toast('修改失败!')
+          // 刷新数据
+          this.getUserInfoByVuex()
+          this.$router.back()
+        } catch (err) {
+          console.log(err)
         }
       } else {
+        // 修改文本类的信息
         this.editTextValue()
       }
     },
@@ -104,14 +106,14 @@ export default {
     async editTextValue () {
       const text = this.type === 'nickname' ? '修改昵称' : this.type === 'intro' ? '修改简介' : '修改职位'
       if (this.inputVal.trim().length === 0) return this.$toast(text + '不能为空')
-      const { data: res } = await editUserInfoApi({ [this.type]: this.inputVal })
-      // console.log(res)
-      if (res.code === 200) {
+      try {
+        await editUserInfoApi({ [this.type]: this.inputVal })
         this.$toast('修改成功!')
-        eventbus.$emit('get-userinfo')
-        return this.$router.back()
-      } else {
-        return this.$toast('修改失败!')
+        // 刷新数据
+        this.getUserInfoByVuex()
+        this.$router.back()
+      } catch (err) {
+        console.log(err)
       }
     }
   }

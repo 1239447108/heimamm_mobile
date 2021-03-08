@@ -2,9 +2,11 @@
   <div>
     <back title=''></back>
     <div class="padding" v-if='detail.title'>
+      <!-- 标题 -->
       <div class="detail_title">
         {{ detail.title }}
       </div>
+      <!-- 用户信息 -->
       <div class="detail_header">
         <div class="avatar">
           <img :src="baseUrl + detail.author.avatar" alt="">
@@ -18,42 +20,59 @@
           </div>
         </div>
       </div>
+      <!-- 面经分享内容 -->
       <div class="detail_content" v-html="detail.content">
 
       </div>
-      <div>
-        评论
-        <shareComments/>
+      <!-- 评论部分 -->
+      <div class="comment">
+        <!-- 评论标题 -->
+        <van-badge :content="total">
+          <div class="comment_title">
+            评论
+          </div>
+        </van-badge>
+        <!-- 评论列表 -->
+        <shareComments :list='commentList'/>
       </div>
+      <!-- 底部工具栏 -->
       <div class="footer">
-        <div class="input">
+        <div @click='isCommentInputShow = true' class="input">
           我来补充两句
         </div>
         <div class="tools">
           <!-- 收藏 -->
           <div class="tool">
             <i class="iconfont iconbtn_shoucang_nor"></i>
-            323
+            {{ detail.collect }}
           </div>
           <!-- 点赞 -->
           <div class="tool">
             <i class="iconfont iconbtn_dianzan_big_nor"></i>
-            323
+            {{ detail.star }}
           </div>
           <!-- 分享 -->
           <div class="tool">
             <i class="iconfont iconbtn_share"></i>
-            323
+            {{ detail.share }}
           </div>
         </div>
       </div>
     </div>
+    <!-- 评论弹出层 -->
+    <van-popup v-model="isCommentInputShow" round position="bottom" :style="{ height: '30%' }" >
+      <div class="pop">
+        <textarea placeholder="我来补充几句" type="text" />
+        <div class="send">发送</div>
+      </div>
+    </van-popup>
   </div>
 </template>
 <script>
 import Back from '@/components/back'
 import shareComments from '@/components/shareComments'
-import { getShareDetailApi } from '@/api/find'
+import { getShareDetailApi, getShareCommentApi } from '@/api/find'
+import eventbus from '@/utils/eventbus'
 export default {
   name: '',
   components: {
@@ -63,17 +82,37 @@ export default {
   props: {},
   data () {
     return {
+      // 文章详情信息
       detail: {},
-      baseUrl: process.env.VUE_APP_BASEURL
+      baseUrl: process.env.VUE_APP_BASEURL,
+      // 评论列表
+      commentList: [],
+      isCommentInputShow: false
     }
   },
   computed: {},
   watch: {},
   created () {
+    eventbus.$on('get-comment-data', () => {
+      this.getComment()
+    })
     this.getDetail()
+    this.getComment()
   },
   mounted () {},
   methods: {
+    // 获取评论列表
+    async getComment () {
+      try {
+        const { data: res } = await getShareCommentApi(this.$route.params.id)
+        // console.log(res)
+        this.commentList = res.data.list
+        this.total = res.data.total
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    // 获取面经分享详情
     async getDetail () {
       try {
         const { data: res } = await getShareDetailApi(this.$route.params.id)
@@ -135,6 +174,20 @@ export default {
           max-width: 345px !important;
         }
       }
+      .comment{
+        font-size: 18px;
+        font-family: PingFangSC, PingFangSC-Medium;
+        font-weight: 500;
+        color: #222222;
+        line-height: 25px;
+        span{
+          margin-top: -15px;
+          font-size: 12px;
+          font-family: PingFangSC, PingFangSC-Medium;
+          color: #b4b4bd;
+          line-height: 17px;
+        }
+      }
       .footer{
         height: 85px;
         width: 100%;
@@ -177,6 +230,20 @@ export default {
               font-size: 32px;
             }
           }
+        }
+      }
+      .pop{
+        textarea{
+          resize: none;
+          background: #f7f4f5;
+          border-radius: 4px;
+          font-size: 14px;
+        }
+        .send{
+          width: 33px;
+          height: 23px;
+          font-family: PingFangSC, PingFangSC-Regular;
+          color: #b4b4bd;
         }
       }
     }

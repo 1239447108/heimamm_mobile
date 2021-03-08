@@ -68,3 +68,19 @@ export const getSearchHistoryApi = data => {
     needToken: true
   })
 }
+
+export const getShareCommentApi = data => {
+  return request({
+    url: '/articles/comments/' + data,
+    needToken: false
+  })
+}
+
+export const starCommentByIdApi = data => {
+  return request({
+    url: '/article-comments/star',
+    method: 'POST',
+    data,
+    needToken: true
+  })
+}

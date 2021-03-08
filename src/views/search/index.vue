@@ -49,7 +49,7 @@
 </template>
 <script>
 import Back from '@/components/back'
-import { getShareList, getTechnicList, getTechnicTopApi, getShareTopApi } from '@/api/find'
+import { getShareListApi, getTechnicListApi, getTechnicTopApi, getShareTopApi } from '@/api/find'
 import findShare from '@/components/findShare'
 import findTechnic from '@/components/findTechnic'
 export default {
@@ -118,7 +118,7 @@ export default {
         // 面试技巧搜索
         if (this.type === 'technic') {
           try {
-            const { data: res } = await getTechnicList({ q: val, limit: 10 })
+            const { data: res } = await getTechnicListApi({ q: val, limit: 10 })
             // console.log(res)
             if (res.data.list.length > 0) {
               this.technicList = res.data.list
@@ -131,7 +131,7 @@ export default {
         } else {
           // 面经分享搜索
           try {
-            const { data: res } = await getShareList({ q: val, limit: 10 })
+            const { data: res } = await getShareListApi({ q: val, limit: 10 })
             // console.log(res)
             if (res.data.list.length > 0) {
               this.shareList = res.data.list

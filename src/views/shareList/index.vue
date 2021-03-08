@@ -13,7 +13,7 @@
 </template>
 <script>
 import Back from '@/components/back'
-import { getShareList } from '@/api/find'
+import { getShareListApi } from '@/api/find'
 import findShare from '@/components/findShare'
 export default {
   name: '',
@@ -30,7 +30,7 @@ export default {
   computed: {},
   watch: {},
   created () {
-    getShareList({ limit: 10 })
+    getShareListApi({ limit: 10 })
       .then(res => {
         // console.log(res.data)
         if (res.data.code === 200) {

@@ -1,25 +1,25 @@
 <template>
-  <div class="my" v-if='info'>
+  <div class="my" v-if='userInfo'>
     <header class="my_content">
       <div class="person_info">
         <div class="person_info_left">
           <div class="person_info_name">
-            {{ info.nickname }}
+            {{ userInfo.nickname }}
           </div>
-          <div class="person_info_words" v-if='info.intro'>
-            {{ info.intro ? info.intro : '这个人很懒，还没有介绍哦' }}
+          <div class="person_info_words" v-if='userInfo.intro'>
+            {{ userInfo.intro ? userInfo.intro : '这个人很懒，还没有介绍哦' }}
           </div>
         </div>
         <van-image
           class="person_info_avatar"
           @click='toInfo'
-          :src="baseUrl + info.avatar"
+          :src="baseUrl + userInfo.avatar"
         />
       </div>
       <div class="count_content">
         <div class="count_item">
           <div class="count_item_num">
-            {{ info.submitNum }}
+            {{ userInfo.submitNum }}
           </div>
           <div class="count_item_text">
             累计答题
@@ -27,7 +27,7 @@
         </div>
         <div class="count_item">
           <div class="count_item_num">
-            {{ info.collectQuestions.length }}
+            {{ userInfo.collectQuestions.length }}
           </div>
           <div class="count_item_text">
             收藏题目
@@ -35,7 +35,7 @@
         </div>
         <div class="count_item">
           <div class="count_item_num">
-            {{ info.errorQuestions.length }}
+            {{ userInfo.errorQuestions.length }}
           </div>
           <div class="count_item_text">
             我的错题
@@ -43,7 +43,7 @@
         </div>
         <div class="count_item">
           <div class="count_item_num">
-            {{ info.submitNum === 0 ? 0 : ((info.submitNum - info.errorNum) / info.submitNum * 100).toFixed(2) }}%
+            {{ userInfo.submitNum === 0 ? 0 : ((userInfo.submitNum - userInfo.errorNum) / userInfo.submitNum * 100).toFixed(0) }}%
           </div>
           <div class="count_item_text">
             正确率
@@ -54,7 +54,7 @@
     <div class="card">
       <!-- 我的岗位 -->
       <div class="card_myjob">
-        <van-cell title="我的岗位" @click='editPosition' size='40' :value="info.position" is-link>
+        <van-cell title="我的岗位" @click='editPosition' size='40' :value="userInfo.position" is-link>
           <template #icon>
             <i class="mright_icon iconfont iconicon_mine_gangwei"></i>
           </template>
@@ -69,10 +69,10 @@
           <div class="data_count_item">
             <div class="data_count_yesterday">
               昨日阅读
-              <span>+{{ info.shareData.read.yesterday }}</span>
+              <span>+{{ userInfo.shareData.read.yesterday }}</span>
             </div>
             <div class="data_count_num">
-              {{ info.shareData.read.total }}
+              {{ userInfo.shareData.read.total }}
             </div>
             <div class="data_count_text">
               阅读总数
@@ -81,10 +81,10 @@
           <div class="data_count_item">
             <div class="data_count_yesterday">
               昨日获赞
-              <span>+{{ info.shareData.star.yesterday }}</span>
+              <span>+{{ userInfo.shareData.star.yesterday }}</span>
             </div>
             <div class="data_count_num">
-              {{ info.shareData.star.total }}
+              {{ userInfo.shareData.star.total }}
             </div>
             <div class="data_count_text">
               获赞总数
@@ -93,10 +93,10 @@
           <div class="data_count_item">
             <div class="data_count_yesterday">
               昨日评论
-              <span>+{{ info.shareData.comment.yesterday }}</span>
+              <span>+{{ userInfo.shareData.comment.yesterday }}</span>
             </div>
             <div class="data_count_num">
-              {{ info.shareData.comment.total }}
+              {{ userInfo.shareData.comment.total }}
             </div>
             <div class="data_count_text">
               评论总数
@@ -111,7 +111,7 @@
             <i class="mright_icon iconfont iconicon_mine_mianjing"></i>
           </template>
         </van-cell>
-        <van-cell class="card_list_item" title="我的消息" size='40' :value="info.systemMessages" is-link>
+        <van-cell class="card_list_item" title="我的消息" size='40' :value="userInfo.systemMessages" is-link>
           <template #icon>
             <i class="mright_icon iconfont iconicon_mine_xiaoxi"></i>
           </template>
@@ -126,7 +126,7 @@
             <i class="mright_icon iconfont iconicon_mine_qiyeshoucang"></i>
           </template>
         </van-cell>
-        <van-cell class="card_list_item" title="我的错题" size='40' :value="info.errorQuestions.length" is-link>
+        <van-cell class="card_list_item" title="我的错题" size='40' :value="userInfo.errorQuestions.length" is-link>
           <template #icon>
             <i class="mright_icon iconfont iconicon_mine_cuoti"></i>
           </template>
@@ -141,54 +141,35 @@
   </div>
 </template>
 <script>
-import { mapMutations } from 'vuex'
-import { getUserInfoApi } from '@/api/user'
-import eventbus from '@/utils/eventbus'
+import { mapState, mapMutations } from 'vuex'
 export default {
   name: '',
   components: {},
   props: {},
   data () {
     return {
-      info: null,
       baseUrl: process.env.VUE_APP_BASEURL
     }
   },
   computed: {
+    ...mapState(['isLogin', 'userInfo'])
   },
   watch: {},
   created () {
-    this.getUserInfo()
   },
   mounted () {
-    // 通过event-bus监听事件
-    eventbus.$on('get-userinfo', () => {
-      this.getUserInfo()
-    })
+
   },
   methods: {
-    ...mapMutations(['setUserInfo']),
+    ...mapMutations(['setUserInfo', 'setIsLogin']),
     toInfo () {
       this.$router.push('/info')
-    },
-    // 获取用户信息
-    async getUserInfo () {
-      const { data: res } = await getUserInfoApi()
-      // console.log(res)
-      if (res.code === 200) {
-        // 将用户信息保存到vuex里
-        this.setUserInfo(res.data)
-        this.info = res.data
-      } else {
-        this.$toast('获取用户信息失败!')
-      }
     },
     editPosition () {
       this.$router.push('/editInfo?type=position')
     }
   },
   destroyed () {
-    eventbus.$off('get-userinfo')
   }
 }
 </script>
@@ -196,6 +177,7 @@ export default {
 .my{
   position: relative;
   background-color: #F7F4F5;
+  height: 600px;
   .my_content{
     height: 220px;
     background: linear-gradient(45deg,#ce0031, #b8002c);

@@ -58,7 +58,7 @@
 <script>
 import { sendCodeApi, loginApi } from '@/api/login'
 import { setToken } from '@/utils/storage'
-import { mapMutations, mapState } from 'vuex'
+import { mapMutations } from 'vuex'
 import Back from '@/components/back'
 export default {
   name: '',
@@ -77,7 +77,6 @@ export default {
     }
   },
   computed: {
-    ...mapState(['prevUrl'])
   },
   watch: {},
   created () {},
@@ -143,9 +142,9 @@ export default {
         })
     },
     async onLogin () {
-      const { data: res } = await loginApi(this.form)
-      // console.log(res)
-      if (res.code === 200) {
+      try {
+        const { data: res } = await loginApi(this.form)
+        // console.log(res)
         this.$toast({
           message: '登录成功!',
           position: 'top'
@@ -154,15 +153,17 @@ export default {
         setToken('hm_m_token', res.data.jwt)
         // 设置登录状态
         this.setIsLogin(true)
+        // 保存用户信息
+        this.setUserInfo(res.data.user)
         // 如果有跳转到登录之前的链接，则登录之后回到该页面
-        if (this.prevUrl) {
-          return this.$router.push(this.prevUrl)
+        if (this.$route.query.history) {
+          return this.$router.push(this.$route.query.history)
         }
         // 否则跳转到我的页面
         this.$router.push('/my')
-      } else {
+      } catch (err) {
         this.$toast({
-          message: res.message,
+          message: err.message,
           position: 'top'
         })
       }

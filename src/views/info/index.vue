@@ -50,11 +50,10 @@
 <script>
 import Vue from 'vue'
 import Back from '@/components/back'
-import { mapState, mapMutations } from 'vuex'
+import { mapState, mapMutations, mapActions } from 'vuex'
 import { Dialog } from 'vant'
 import { removeToken } from '@/utils/storage'
-import { editUserInfo } from '@/api/user'
-import eventbus from '@/utils/eventbus'
+import { editUserInfoApi } from '@/api/user'
 import areaList from '@/utils/area.js'
 
 // 全局注册
@@ -92,18 +91,14 @@ export default {
   },
   watch: {},
   created () {
-    // 如果丢失用户数据，则再次请求(bug：不触发)
-    if (this.userInfo === null) {
-      console.log('用户信息为空!!')
-      eventbus.$emit('get-userinfo')
-    }
     this.areaList = areaList
     this.areaCode = this.userInfo.area
   },
   mounted () {
   },
   methods: {
-    ...mapMutations(['setUserInfo']),
+    ...mapActions(['getUserInfoByVuex']),
+    ...mapMutations(['setUserInfo', 'setIsLogin']),
     editAvatar () {
       this.$router.push('/editInfo?type=avatar')
     },
@@ -123,6 +118,7 @@ export default {
           // 清除缓存
           removeToken('hm_m_token')
           this.setUserInfo(null)
+          this.setIsLogin(false)
           this.$router.push('/find')
         })
         .catch(() => {
@@ -130,24 +126,26 @@ export default {
         })
     },
     async changeSex () {
-      const { data: res } = await editUserInfo({ gender: this.$refs.sexPicker.getIndexes() })
+      const { data: res } = await editUserInfoApi({ gender: this.$refs.sexPicker.getIndexes() })
       // console.log(res)
       if (res.code === 200) {
         this.$toast('修改成功!')
         this.isSexShow = false
-        eventbus.$emit('get-userinfo')
+        // 刷新数据
+        this.getUserInfoByVuex()
       } else {
         this.$toast('修改失败!  ')
       }
     },
     async changeArea (arr) {
       // console.log(arr)
-      const { data: res } = await editUserInfo({ area: arr[1].code })
+      const { data: res } = await editUserInfoApi({ area: arr[1].code })
       // console.log(res)
       if (res.code === 200) {
         this.$toast('修改成功!')
         this.isAreaShow = false
-        eventbus.$emit('get-userinfo')
+        // 刷新数据
+        this.getUserInfoByVuex()
       } else {
         this.$toast('修改失败!  ')
       }
