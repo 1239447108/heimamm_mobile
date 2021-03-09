@@ -14,6 +14,11 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   request => {
+    Toast.loading({
+      message: '加载中...',
+      forbidClick: true,
+      duration: 0
+    })
     const token = getToken('hm_m_token')
     // 如果需要使用token，则将其携带在headers中
     if (request.needToken) {
@@ -29,6 +34,7 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
+    Toast.clear()
     const { code } = response.data
     if (code === 200) {
       return response

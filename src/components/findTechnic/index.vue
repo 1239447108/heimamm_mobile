@@ -53,7 +53,7 @@ export default {
     },
     async star (id) {
       const { data: res } = await starArticleByIdApi({ article: id })
-      console.log(res)
+      // console.log(res)
       if (res.code === 200) {
         this.$toast('操作成功!')
         eventbus.$emit('get-technic-data')

@@ -26,7 +26,6 @@ import { getTechnicListApi, getShareListApi, getHotDataApi } from '@/api/find'
 import eventbus from '@/utils/eventbus'
 
 export default {
-  name: '',
   components: {
     findTechnic,
     findShare,
@@ -67,6 +66,7 @@ export default {
     toShare () {
       this.$router.push('/shareList')
     },
+    // 获取面试技巧数据
     getTechnicData () {
       getTechnicListApi({ limit: 3 })
         .then(res => {
@@ -77,6 +77,7 @@ export default {
           console.log(err)
         })
     },
+    // 获取面经分享数据
     getShareData () {
       getShareListApi({ limit: 3 })
         .then(res => {
@@ -87,6 +88,7 @@ export default {
           console.log(err)
         })
     },
+    // 获取市场数据
     getHotData () {
       getHotDataApi()
         .then(res => {

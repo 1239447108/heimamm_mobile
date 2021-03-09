@@ -6,7 +6,9 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    // 是否登录
     isLogin: false,
+    // 用户信息
     userInfo: null,
     // 底部tabbar是否显示
     isTabbarShow: false
@@ -23,6 +25,7 @@ export default new Vuex.Store({
     }
   },
   actions: {
+    // 获取用户信息
     async getUserInfoByVuex (store) {
       try {
         const { data: res } = await getUserInfoApi()

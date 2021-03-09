@@ -1,40 +1,47 @@
 <template>
   <div class="comments">
-    <div class="comment_item" v-for='item in list' :key='item.id'>
-      <!-- 顶部 -->
-      <div class="item_header">
-        <div class="header_left">
-          <div class="avatar">
-            <img :src="baseUrl + item.author.avatar">
-          </div>
-          <div class="text">
-            <div class="nickname">
-              {{ item.author.nickname }}
+    <van-list
+      v-model="loading"
+      :finished="finished"
+      finished-text="我的有底线的~"
+      @load="onLoad"
+    >
+      <div class="comment_item" v-for='item in list' :key='item.id'>
+        <!-- 顶部 -->
+        <div class="item_header">
+          <div class="header_left">
+            <div class="avatar">
+              <img :src="baseUrl + item.author.avatar">
             </div>
-            <div class="time">
-              {{ item.created_at | relativeTime }}
+            <div class="text">
+              <div class="nickname">
+                {{ item.author.nickname }}
+              </div>
+              <div class="time">
+                {{ item.created_at | relativeTime }}
+              </div>
             </div>
           </div>
+          <div class="header_right">
+            {{ item.star }}
+            <i @click='star(item.id)' class="iconfont iconbtn_dianzan_big_nor"></i>
+          </div>
         </div>
-        <div class="header_right">
-          {{ item.star }}
-          <i @click='star(item.id)' class="iconfont iconbtn_dianzan_big_nor"></i>
+        <!-- 评论内容 -->
+        <div class="item_content">
+          {{ item.content }}
+        </div>
+        <!-- 评论回复 -->
+        <div class="item_reply" v-if='item.children_comments.length > 0'>
+          <div class="reply" v-for='reply in item.children_comments' :key='reply.id'>
+            <span class="reply_nickname">
+              {{ reply.author }}:
+            </span>
+            {{ reply.content }}
+          </div>
         </div>
       </div>
-      <!-- 评论内容 -->
-      <div class="item_content">
-        {{ item.content }}
-      </div>
-      <!-- 评论回复 -->
-      <div class="item_reply">
-        <div class="reply" v-for='reply in item.children_comments' :key='reply.id'>
-          <span class="reply_nickname">
-            {{ reply.author }}:
-          </span>
-          {{ reply.content }}
-        </div>
-      </div>
-    </div>
+    </van-list>
   </div>
 </template>
 <script>
@@ -48,7 +55,9 @@ export default {
   },
   data () {
     return {
-      baseUrl: process.env.VUE_APP_BASEURL
+      baseUrl: process.env.VUE_APP_BASEURL,
+      loading: false,
+      finished: false
     }
   },
   computed: {},
@@ -67,6 +76,9 @@ export default {
       } catch (err) {
         console.log(err)
       }
+    },
+    onLoad () {
+      this.$emit('load')
     }
   }
 }
@@ -101,6 +113,7 @@ export default {
               font-family: PingFangSC, PingFangSC-Semibold;
               font-weight: 600;
               color: #545671;
+              margin-bottom: 5px;
             }
             .time{
               font-family: PingFangSC, PingFangSC-Regular;

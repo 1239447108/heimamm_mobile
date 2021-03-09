@@ -45,12 +45,20 @@ const routes = [
         path: '/question',
         component: () => import('@/views/question'),
         meta: {
-          needLogin: false
+          needLogin: true
         }
       },
       {
         path: '/company',
         component: () => import('@/views/company'),
+        meta: {
+          needLogin: false
+        }
+      },
+      {
+        path: '/companyDetail/:id',
+        component: () => import('@/views/companyDetail'),
+        props: true,
         meta: {
           needLogin: false
         }
@@ -139,9 +147,9 @@ router.beforeEach(async (to, from, next) => {
   // 是否登录
   const { isLogin } = store.state
   // 从哪个路径跳转过来
-  const fromPath = from.path
+  const toPath = to.fullPath
   // 如果直接访问登录页面，则直接放行，不用加参数
-  if (fromPath === '/') return next()
+  if (toPath === '/') return next()
   // 如果该页面需要登录
   if (to.meta.needLogin) {
     // 未登录
@@ -150,7 +158,7 @@ router.beforeEach(async (to, from, next) => {
       if (!token) {
         Toast.fail('请登录')
         // 告诉login页面登录成功之后返回上一个页面
-        return next('/login?history=' + fromPath)
+        return next('/login?redirect=' + toPath)
       } else {
         // 未登录但有token，则通过token获取用户信息
         try {
@@ -164,7 +172,7 @@ router.beforeEach(async (to, from, next) => {
           console.log(err)
           Toast.fail('请登录')
           // 告诉login页面登录成功之后返回上一个页面
-          return next('/login?history=' + fromPath)
+          return next('/login?redirect=' + toPath)
         }
       }
     }

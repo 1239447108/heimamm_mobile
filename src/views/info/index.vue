@@ -49,7 +49,6 @@
 </template>
 <script>
 import Vue from 'vue'
-import Back from '@/components/back'
 import { mapState, mapMutations, mapActions } from 'vuex'
 import { Dialog } from 'vant'
 import { removeToken } from '@/utils/storage'
@@ -61,7 +60,6 @@ Vue.use(Dialog)
 export default {
   name: '',
   components: {
-    Back
   },
   props: {},
   data () {

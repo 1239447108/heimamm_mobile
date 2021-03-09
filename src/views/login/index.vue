@@ -1,6 +1,6 @@
 <template>
   <div>
-    <back title=''></back>
+    <back v-if='$route.query.redirect' title=''></back>
     <h3 class="center_text">
       您好，请登录
     </h3>
@@ -59,11 +59,9 @@
 import { sendCodeApi, loginApi } from '@/api/login'
 import { setToken } from '@/utils/storage'
 import { mapMutations } from 'vuex'
-import Back from '@/components/back'
 export default {
   name: '',
   components: {
-    Back
   },
   props: {},
   data () {
@@ -90,11 +88,6 @@ export default {
       return /^\d{4}$/.test(val)
     },
     send () {
-      this.$toast.loading({
-        message: '加载中...',
-        forbidClick: true,
-        duration: 0
-      })
       this.$refs.login_form.validate('mobile')
         .then(async () => {
           this.isSendBtnDisabled = true
@@ -155,9 +148,9 @@ export default {
         this.setIsLogin(true)
         // 保存用户信息
         this.setUserInfo(res.data.user)
-        // 如果有跳转到登录之前的链接，则登录之后回到该页面
-        if (this.$route.query.history) {
-          return this.$router.push(this.$route.query.history)
+        // 如果有跳转到登录之前的要去的链接，则登录之后跳转到该页面
+        if (this.$route.query.redirect) {
+          return this.$router.push(this.$route.query.redirect)
         }
         // 否则跳转到我的页面
         this.$router.push('/my')

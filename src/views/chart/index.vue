@@ -71,11 +71,9 @@
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 export default {
   name: '',
   components: {
-    Back
   },
   props: {},
   data () {

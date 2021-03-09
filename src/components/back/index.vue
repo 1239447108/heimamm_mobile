@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="back">
     <van-nav-bar
       @click-left="onClickLeft"
       @click-right='onClickRight'
@@ -43,21 +43,19 @@ export default {
   }
 }
 </script>
-<style lang='less'>
-  .van-nav-bar{
-    .van-nav-bar__content{
-      .van-nav-bar__left{
-        padding: 0;
-      }
+<style lang='less' scoped>
+  .back{
+    /deep/ .van-nav-bar__left{
+      padding: 0;
     }
-  }
-  .backicon{
-    font-size:40px;
-  }
-  .title{
-    font-size: 18px;
-    font-weight: 600;
-    font-family: PingFangSC, PingFangSC-Semibold;
-    color: #222222;
+    .backicon{
+      font-size:40px;
+    }
+    .title{
+      font-size: 18px;
+      font-weight: 600;
+      font-family: PingFangSC, PingFangSC-Semibold;
+      color: #222222;
+    }
   }
 </style>

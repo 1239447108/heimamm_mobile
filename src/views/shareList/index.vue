@@ -12,13 +12,11 @@
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 import { getShareListApi } from '@/api/find'
 import findShare from '@/components/findShare'
 export default {
   name: '',
   components: {
-    Back,
     findShare
   },
   props: {},

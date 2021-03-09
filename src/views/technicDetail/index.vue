@@ -25,12 +25,10 @@
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 import { getTechnicDetailApi } from '@/api/find'
 export default {
   name: '',
   components: {
-    Back
   },
   props: {},
   data () {

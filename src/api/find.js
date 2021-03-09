@@ -69,9 +69,10 @@ export const getSearchHistoryApi = data => {
   })
 }
 
-export const getShareCommentApi = data => {
+export const getShareCommentApi = (id, params) => {
   return request({
-    url: '/articles/comments/' + data,
+    url: '/articles/comments/' + id,
+    params,
     needToken: false
   })
 }
@@ -79,6 +80,15 @@ export const getShareCommentApi = data => {
 export const starCommentByIdApi = data => {
   return request({
     url: '/article-comments/star',
+    method: 'POST',
+    data,
+    needToken: true
+  })
+}
+
+export const sendCommentByIdApi = data => {
+  return request({
+    url: '/articles/comments',
     method: 'POST',
     data,
     needToken: true

@@ -12,13 +12,11 @@
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 import { mapState, mapActions } from 'vuex'
 import { uploadAvatarApi, editUserInfoApi } from '@/api/user'
 export default {
   name: '',
   components: {
-    Back
   },
   props: {},
   data () {

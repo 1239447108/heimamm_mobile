@@ -5,6 +5,7 @@ import store from './store'
 import Vant from 'vant'
 import 'vant/lib/index.css'
 
+import myPlugin from '@/utils/plugins/myFirstPlugin'
 // 引入dayjs
 import './utils/dayjs'
 
@@ -14,6 +15,8 @@ import '@/styles/iconfont/iconfont.css'
 
 Vue.use(Vant)
 Vue.config.productionTip = false
+
+Vue.use(myPlugin)
 
 new Vue({
   router,

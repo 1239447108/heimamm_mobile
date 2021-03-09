@@ -117,9 +117,14 @@ export default {
             }
           }
           .user_nickname{
+            max-width: 40px;
             font-size: 12px;
             color: #545671;
             font-family: PingFangSC, PingFangSC-Regular;
+            // 单行溢出显示省略号
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
         }
         .share_footer_right{

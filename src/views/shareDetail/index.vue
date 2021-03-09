@@ -22,7 +22,6 @@
       </div>
       <!-- 面经分享内容 -->
       <div class="detail_content" v-html="detail.content">
-
       </div>
       <!-- 评论部分 -->
       <div class="comment">
@@ -33,7 +32,7 @@
           </div>
         </van-badge>
         <!-- 评论列表 -->
-        <shareComments :list='commentList'/>
+        <shareComments @load='getMore' ref='list' :list='commentList'/>
       </div>
       <!-- 底部工具栏 -->
       <div class="footer">
@@ -52,7 +51,7 @@
             {{ detail.star }}
           </div>
           <!-- 分享 -->
-          <div class="tool">
+          <div class="tool" @click='isShareDialogShow = true'>
             <i class="iconfont iconbtn_share"></i>
             {{ detail.share }}
           </div>
@@ -62,21 +61,23 @@
     <!-- 评论弹出层 -->
     <van-popup v-model="isCommentInputShow" round position="bottom" :style="{ height: '30%' }" >
       <div class="pop">
-        <textarea placeholder="我来补充几句" type="text" />
-        <div class="send">发送</div>
+        <textarea v-model='commentVal' placeholder="我来补充几句" type="text" />
+        <div @click='sendComment' class="send">发送</div>
       </div>
     </van-popup>
+    <!-- 分享弹出层 -->
+    <van-dialog v-model="isShareDialogShow" title="分享" show-cancel-button>
+      <img :style='{width: "100%", height: "100%"}' src="https://img01.yzcdn.cn/vant/apple-3.jpg" />
+    </van-dialog>
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 import shareComments from '@/components/shareComments'
-import { getShareDetailApi, getShareCommentApi } from '@/api/find'
+import { getShareDetailApi, getShareCommentApi, sendCommentByIdApi } from '@/api/find'
 import eventbus from '@/utils/eventbus'
 export default {
   name: '',
   components: {
-    Back,
     shareComments
   },
   props: {},
@@ -87,7 +88,12 @@ export default {
       baseUrl: process.env.VUE_APP_BASEURL,
       // 评论列表
       commentList: [],
-      isCommentInputShow: false
+      isCommentInputShow: false,
+      isShareDialogShow: false,
+      start: 0,
+      total: 0,
+      // 输入的评论值
+      commentVal: ''
     }
   },
   computed: {},
@@ -104,10 +110,13 @@ export default {
     // 获取评论列表
     async getComment () {
       try {
-        const { data: res } = await getShareCommentApi(this.$route.params.id)
+        const { data: res } = await getShareCommentApi(this.$route.params.id, { start: this.start })
         // console.log(res)
-        this.commentList = res.data.list
+        this.commentList = [...this.commentList, ...res.data.list]
         this.total = res.data.total
+        if (this.$refs.list) {
+          this.$refs.list.loading = false
+        }
       } catch (err) {
         console.log(err)
       }
@@ -120,6 +129,37 @@ export default {
         this.detail = res.data
       } catch (err) {
         console.log(err)
+      }
+    },
+    // 加载更多评论
+    getMore () {
+      if (this.start + 5 > this.total) {
+        this.$refs.list.finished = true
+        return
+      } else {
+        this.start += 5
+      }
+      this.getComment()
+    },
+    // 发布评论
+    async sendComment () {
+      const val = this.commentVal.trim()
+      if (val.length > 0) {
+        try {
+          const { data: res } = await sendCommentByIdApi({ article: this.$route.params.id, content: val })
+          console.log(res)
+          this.$toast('发布成功!')
+          this.commentVal = ''
+          this.isCommentInputShow = false
+          // 刷新数据
+          this.start = 0
+          const { data: res2 } = await getShareCommentApi(this.$route.params.id, { start: this.start })
+          // console.log(res2)
+          this.commentList = res2.data.list
+          this.total = res2.data.total
+        } catch (err) {
+          console.log(err)
+        }
       }
     }
   }
@@ -232,19 +272,27 @@ export default {
           }
         }
       }
-      .pop{
-        textarea{
-          resize: none;
-          background: #f7f4f5;
-          border-radius: 4px;
-          font-size: 14px;
-        }
-        .send{
-          width: 33px;
-          height: 23px;
-          font-family: PingFangSC, PingFangSC-Regular;
-          color: #b4b4bd;
-        }
+    }
+    .pop{
+      padding: 25px 15px;
+      textarea{
+        border:0;
+        width: 310px;
+        height: 110px;
+        padding: 10px 14px;
+        resize: none;
+        background-color: #f7f4f5;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+      .send{
+        float: right;
+        margin-top: 10px;
+        width: 40px;
+        height: 23px;
+        font-size: 16px;
+        font-family: PingFangSC, PingFangSC-Regular;
+        color: #b4b4bd;
       }
     }
 </style>

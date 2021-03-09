@@ -48,14 +48,12 @@
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 import { getShareListApi, getTechnicListApi, getTechnicTopApi, getShareTopApi } from '@/api/find'
 import findShare from '@/components/findShare'
 import findTechnic from '@/components/findTechnic'
 export default {
   name: '',
   components: {
-    Back,
     findShare,
     findTechnic
   },

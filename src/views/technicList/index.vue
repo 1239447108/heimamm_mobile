@@ -12,13 +12,11 @@
   </div>
 </template>
 <script>
-import Back from '@/components/back'
 import { getTechnicListApi } from '@/api/find'
 import findTechnic from '@/components/findTechnic'
 export default {
   name: '',
   components: {
-    Back,
     findTechnic
   },
   props: {},
