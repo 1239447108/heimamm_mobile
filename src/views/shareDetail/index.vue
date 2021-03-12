@@ -32,7 +32,7 @@
           </div>
         </van-badge>
         <!-- 评论列表 -->
-        <shareComments @load='getMore' ref='list' :list='commentList'/>
+        <shareComments @load='getMore' @reply='reply' ref='list' :list='commentList'/>
       </div>
       <!-- 底部工具栏 -->
       <div class="footer">
@@ -59,9 +59,9 @@
       </div>
     </div>
     <!-- 评论弹出层 -->
-    <van-popup v-model="isCommentInputShow" round position="bottom" :style="{ height: '30%' }" >
+    <van-popup @close='popClose' v-model="isCommentInputShow" round position="bottom" :style="{ height: '30%' }" >
       <div class="pop">
-        <textarea v-model='commentVal' placeholder="我来补充几句" type="text" />
+        <textarea v-model='commentVal' :placeholder="placeHolderText" type="text" />
         <div @click='sendComment' class="send">发送</div>
       </div>
     </van-popup>
@@ -93,7 +93,10 @@ export default {
       start: 0,
       total: 0,
       // 输入的评论值
-      commentVal: ''
+      commentVal: '',
+      placeHolderText: '我来补充两句',
+      // 要回复评论的id
+      replyId: ''
     }
   },
   computed: {},
@@ -144,12 +147,18 @@ export default {
     // 发布评论
     async sendComment () {
       const val = this.commentVal.trim()
+      const queryObj = {
+        article: this.$route.params.id,
+        content: val
+      }
+      if (this.replyId) {
+        queryObj.parent = this.replyId
+      }
       if (val.length > 0) {
         try {
-          const { data: res } = await sendCommentByIdApi({ article: this.$route.params.id, content: val })
+          const { data: res } = await sendCommentByIdApi(queryObj)
           console.log(res)
           this.$toast('发布成功!')
-          this.commentVal = ''
           this.isCommentInputShow = false
           // 刷新数据
           this.start = 0
@@ -161,6 +170,18 @@ export default {
           console.log(err)
         }
       }
+    },
+    // 回复评论
+    reply (obj) {
+      const { id, name } = obj
+      this.replyId = id
+      this.placeHolderText = `回复 ${name}:`
+      this.isCommentInputShow = true
+    },
+    // 监听弹出层的关闭事件
+    popClose () {
+      this.commentVal = ''
+      this.replyId = ''
     }
   }
 }

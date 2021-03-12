@@ -2,7 +2,7 @@
   <div class="info">
     <back title='我的资料'></back>
     <div class="info_content" v-if='userInfo'>
-      <van-cell @click='editAvatar' title="头像" class="cell_avatar">
+      <van-cell @click='editInfo("avatar")' title="头像" class="cell_avatar">
         <template #default>
           <div class="right">
             <van-image
@@ -15,10 +15,10 @@
         </template>
       </van-cell>
       <div class="cell_group">
-        <van-cell @click='editNickname' title="昵称" is-link :value="userInfo.nickname" />
+        <van-cell @click='editInfo("nickname")' title="昵称" is-link :value="userInfo.nickname" />
         <van-cell @click='isSexShow = true' title="性别" is-link :value="userInfo.gender === 0 ? '未知' : userInfo.gender === 1 ? '男' : '女'" />
-        <van-cell @click='isAreaShow = true' title="地区" is-link :value="getAreaNameByCode(userInfo.area)" />
-        <van-cell @click='editIntro' title="个人简介" is-link :value="userInfo.intro ? userInfo.intro : '暂无'" />
+        <van-cell @click='isAreaShow = true' title="地区" is-link :value="areaList.city_list[userInfo.area]" />
+        <van-cell @click='editInfo("intro")' title="个人简介" is-link :value="userInfo.intro ? userInfo.intro : '暂无'" />
       </div>
       <van-button @click='logout' color="#E40137" type="default" block>退出登录</van-button>
     </div>
@@ -40,7 +40,7 @@
         title="选择地区"
         :area-list="areaList"
         :columns-num="2"
-        :value='areaCode'
+        :value='userInfo.area'
         @confirm="changeArea"
         @cancel="isAreaShow = false"
       />
@@ -81,7 +81,7 @@ export default {
         }
       ],
       isAreaShow: false,
-      areaCode: ''
+      areaList: {}
     }
   },
   computed: {
@@ -90,21 +90,15 @@ export default {
   watch: {},
   created () {
     this.areaList = areaList
-    this.areaCode = this.userInfo.area
   },
   mounted () {
   },
   methods: {
     ...mapActions(['getUserInfoByVuex']),
     ...mapMutations(['setUserInfo', 'setIsLogin']),
-    editAvatar () {
-      this.$router.push('/editInfo?type=avatar')
-    },
-    editNickname () {
-      this.$router.push('/editInfo?type=nickname')
-    },
-    editIntro () {
-      this.$router.push('/editInfo?type=intro')
+    // type avatar为头像, nickname为昵称, intro为简介
+    editInfo (type) {
+      this.$router.push('/editInfo?type=' + type)
     },
     // 退出登录
     logout () {
@@ -147,13 +141,6 @@ export default {
       } else {
         this.$toast('修改失败!  ')
       }
-    },
-    getAreaNameByCode (code) {
-      let areaName = ''
-      for (const k in areaList.city_list) {
-        if (k === code) areaName = areaList.city_list[k]
-      }
-      return areaName
     }
   }
 }

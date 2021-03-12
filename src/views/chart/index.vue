@@ -71,6 +71,7 @@
   </div>
 </template>
 <script>
+import { getDataIndexApi } from '@/api/data'
 export default {
   name: '',
   components: {
@@ -95,9 +96,20 @@ export default {
   },
   computed: {},
   watch: {},
-  created () {},
+  created () {
+    this.getDataIndex()
+  },
   mounted () {},
-  methods: {}
+  methods: {
+    async getDataIndex () {
+      try {
+        const { data: res } = await getDataIndexApi()
+        console.log(res)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
 }
 </script>
 <style scoped lang='less'>

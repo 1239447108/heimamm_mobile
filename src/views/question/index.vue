@@ -2,6 +2,9 @@
   <div class="question">
     <header>
       面试宝典
+      <!-- <span @click='isCityPickerShow = true'>
+        北京
+      </span> -->
       <van-dropdown-menu>
         <van-dropdown-item v-model="city" :options="cities" />
       </van-dropdown-menu>
@@ -57,7 +60,7 @@
         累计收录
       </div>
       <div class="count_num">
-        5,464,654
+        126
       </div>
     </div>
     <div class="btn">
@@ -67,6 +70,7 @@
 </template>
 <script>
 import { Chart } from '@antv/g2'
+import { getQuestionFiltersApi } from '@/api/question'
 export default {
   name: '',
   components: {},
@@ -88,6 +92,7 @@ export default {
           value: 2
         }
       ],
+      citys: [],
       positions: [
         '服务端',
         '前端',
@@ -96,12 +101,16 @@ export default {
         '技术',
         '美工'
       ],
-      curPositionIndex: 0
+      curPositionIndex: 0,
+      cityPositions: [],
+      isCityPickerShow: false,
+      indexList: [1, 2, 3, 4]
     }
   },
   computed: {},
   watch: {},
   created () {
+    this.getQuestionFilter()
   },
   mounted () {
     const data = [
@@ -174,7 +183,18 @@ export default {
     })
     chart.render()
   },
-  methods: {}
+  methods: {
+    async getQuestionFilter () {
+      try {
+        const { data: res } = await getQuestionFiltersApi()
+        console.log(res)
+        this.citys = res.data.citys
+        this.cityPositions = res.data.cityPositions
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }
 }
 </script>
 <style scoped lang='less'>
@@ -211,7 +231,7 @@ export default {
           font-family: PingFangSC, PingFangSC-Regular;
           font-size: 12px;
           color: #545671;
-          padding: 6px 14px;
+          padding: 8px 14px;
           transition: all 1s;
         }
         span.active{

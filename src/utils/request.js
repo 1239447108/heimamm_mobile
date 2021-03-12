@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { removeToken, getToken } from '@/utils/storage'
-import store from '@/store'
+import { getToken } from '@/utils/storage'
+// import store from '@/store'
 import router from '@/router'
 import Vue from 'vue'
 import { Toast } from 'vant'
@@ -39,12 +39,12 @@ request.interceptors.response.use(
     if (code === 200) {
       return response
     }
-    // 如果状态码异常，则清除登录状态
+    // 如果状态码异常，则返回上一个页面
     if (code === 400 || code === 401 || code === 403) {
       Toast.fail(response.data.message)
-      removeToken()
-      store.commit('setIsLogin', false)
-      router.push('/login')
+      // removeToken('hm_m_token')
+      // store.commit('setIsLogin', false)
+      router.go(-1)
     }
     return Promise.reject(new Error(response.data.message))
   },

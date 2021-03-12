@@ -153,7 +153,7 @@
     <div class="comment">
       <div class="title">
         面试评价
-        <span>写评论</span>
+        <span @click='openCommentDialog'>写评论</span>
       </div>
       <div class="content">
         <div class="left">
@@ -207,24 +207,89 @@
       </div>
     </div>
     <!-- 评论列表 -->
-    <companyComments ref='list' :list='commentList' @load='getMore' />
+    <company-comments ref='list' :list='commentList' @load='getMore' />
     <!-- 固定底部 -->
     <footer>
-      <div class="btn">
+      <div @click='toPosition' class="btn">
         <van-badge :content="detail.positions">
           在招职位
         </van-badge>
       </div>
-      <div class="btn">
+      <div @click='toQuestion' class="btn">
         <van-badge :content="detail.questions">
           企业面试题
         </van-badge>
       </div>
     </footer>
+    <!-- 评论的弹出框 -->
+    <van-popup  @close='commentDialogClose' round  v-model="isCommentDialogShow">
+      <div class="comment_dialog">
+        <div class="title">
+          请根据实际情况为企业打分
+        </div>
+        <div class="center">
+          <div class="item">
+            <div class="text">岗位描述</div>
+            <van-rate
+              v-model="positionScore"
+              :size="16"
+              allow-half
+              color="#ffd21e"
+              void-icon="star"
+              void-color="#eee"
+            />
+          </div>
+          <div class="item">
+            <div class="text">面试情况</div>
+            <van-rate
+              v-model="interviewScore"
+              :size="16"
+              allow-half
+              color="#ffd21e"
+              void-icon="star"
+              void-color="#eee"
+            />
+          </div>
+          <div class="item">
+            <div class="text">面试官</div>
+            <van-rate
+              v-model="interviewerScore"
+              :size="16"
+              allow-half
+              color="#ffd21e"
+              void-icon="star"
+              void-color="#eee"
+            />
+          </div>
+          <div class="item">
+            <div class="text">面试岗位</div>
+            <!-- 面试岗位列表 -->
+            <div class="pickerText" @click='isPickerDialogShow = true'>{{ positionPickerText }}</div>
+          </div>
+        </div>
+        <!-- 评论输入框 -->
+        <textarea v-model='content' placeholder="请输入你的面试感受吧" class="comment_textarea"></textarea>
+        <div class="btns">
+          <van-button @click='isCommentDialogShow = false' type="default">取消</van-button>
+          <van-button @click='submitComment' :disabled='isSubmitBtnDisabled' type="default">提交</van-button>
+        </div>
+      </div>
+    </van-popup>
+    <!-- 职位选择器的弹出框 -->
+    <van-popup v-model="isPickerDialogShow" position="bottom">
+      <van-picker
+        title="请选择岗位"
+        show-toolbar
+        ref='positionPicker'
+        :columns="positions"
+        @confirm="onConfirm"
+        @cancel='isPickerDialogShow = false'
+      />
+    </van-popup>
   </div>
 </template>
 <script>
-import { getCompanyDetailByIdApi, getCompanyCommentByIdApi } from '@/api/company'
+import { getCompanyDetailByIdApi, getCompanyCommentByIdApi, getCompanyPositionByIdApi, addCompanyCommentApi } from '@/api/company'
 // 引入图片预览组件
 import { ImagePreview } from 'vant'
 import companyComments from '@/components/companyComments'
@@ -242,7 +307,24 @@ export default {
       showMoreText: '展开更多',
       commentList: [],
       start: 0,
-      total: 0
+      total: 0,
+      // 评论对话框的显示与隐藏
+      isCommentDialogShow: false,
+      // 岗位描述打分
+      positionScore: 5,
+      // 面试情况打分
+      interviewScore: 5,
+      // 面试官打分
+      interviewerScore: 5,
+      // 岗位id
+      position: '',
+      // 评论内容
+      content: '',
+      // 岗位列表, 在评论时获取
+      positions: [],
+      // 岗位列表的底部弹出框的显示与隐藏
+      isPickerDialogShow: false,
+      positionPickerText: '点击选择岗位'
     }
   },
   computed: {
@@ -250,9 +332,15 @@ export default {
     realImgArr () {
       return this.detail.sliders.map(url => this.baseUrl + url)
     },
+    // 平均分
     computedScore () {
       const { score } = this.detail
+      if (!score) return 0
       return ((score.interviewScore + score.interviewerScore + score.positionScore) / 3).toFixed(1) * 1
+    },
+    // 是否禁用提交按钮
+    isSubmitBtnDisabled () {
+      return !this.position || this.content.trim().length === 0
     }
   },
   watch: {},
@@ -272,7 +360,6 @@ export default {
       }
     },
     goBack () {
-      console.log(1111111111)
       this.$router.back()
     },
     // 点击展示更多按钮
@@ -300,13 +387,72 @@ export default {
       }
     },
     getMore () {
-      if (this.start + 5 > this.total) {
+      if (this.start + 5 >= this.total) {
         this.$refs.list.finished = true
+        this.$refs.list.loading = false
         return
       } else {
         this.start += 5
       }
       this.getComment()
+    },
+    toPosition () {
+      this.$router.push('/companyPosition/' + this.$route.params.id)
+    },
+    toQuestion () {
+      this.$router.push('/companyQuestion/' + this.$route.params.id)
+    },
+    async openCommentDialog () {
+      if (this.positions.length === 0) {
+        try {
+        // 将全部岗位都获取
+          const { data: res } = await getCompanyPositionByIdApi(this.$route.params.id, { limit: 100 })
+          // console.log(res)
+          // const arr = []
+          res.data.list.forEach(position => {
+            this.positions.push({
+              text: position.name,
+              id: position.id
+            })
+          })
+        } catch (err) {
+          console.log(err)
+        }
+      }
+      this.isCommentDialogShow = true
+    },
+    // 选择完职位后
+    onConfirm () {
+      this.position = this.$refs.positionPicker.getValues()[0].id
+      this.positionPickerText = this.$refs.positionPicker.getValues()[0].text
+      this.isPickerDialogShow = false
+    },
+    commentDialogClose () {
+      this.content = ''
+      this.positionPickerText = '点击选择岗位'
+      this.positionScore = 5
+      this.interviewScore = 5
+      this.interviewerScore = 5
+      this.position = ''
+    },
+    // 点击提交按钮
+    async submitComment () {
+      try {
+        const { data: res } = await addCompanyCommentApi({
+          content: this.content,
+          interviewScore: this.interviewScore,
+          interviewerScore: this.interviewerScore,
+          positionScore: this.positionScore,
+          position: this.position
+        })
+        console.log(res)
+        this.$toast('提交成功!')
+        this.isCommentDialogShow = false
+        this.commentList = []
+        this.getComment()
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
 }
@@ -642,6 +788,58 @@ export default {
         font-size: 14px;
         color: #181A39;
         font-family: PingFangSC, PingFangSC-Regular;
+      }
+    }
+    .comment_dialog{
+      width: 304px;
+      height: 454px;
+      box-sizing: border-box;
+      padding: 30px;
+      font-size: 15px;
+      color: #545671;
+      border-radius: 10px;
+      .title{
+        text-align: center;
+        font-size: 18px;
+        color: #181A39;
+        font-weight: 600;
+      }
+      .center{
+        padding: 20px 15px;
+        margin-bottom: 10px;
+          .item{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            .text{
+              min-width: 80px;
+              margin-right: 10px;
+            }
+            .pickerText{
+              font-size: 14px;
+              text-align: center;
+              margin-left: 20px;
+              font-weight: 700;
+            }
+          }
+      }
+      .comment_textarea{
+        border:0;
+        width: 220px;
+        height: 110px;
+        padding: 15px;
+        resize: none;
+        background-color: #f7f4f5;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-bottom: 36px;
+      }
+      .btns{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
       }
     }
   }

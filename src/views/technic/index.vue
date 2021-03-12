@@ -5,7 +5,7 @@
       <i class="iconfont iconicon_search"></i>
       请输入关键字
     </div>
-    <findTechnic :list='technicList' />
+    <technicList :list='technicList' />
     <div class="nomore">
       没有更多了
     </div>
@@ -13,11 +13,11 @@
 </template>
 <script>
 import { getTechnicListApi } from '@/api/find'
-import findTechnic from '@/components/findTechnic'
+import technicList from '@/components/technicList'
 export default {
   name: '',
   components: {
-    findTechnic
+    technicList
   },
   props: {},
   data () {

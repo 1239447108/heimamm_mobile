@@ -5,7 +5,7 @@
       <i class="iconfont iconicon_search"></i>
       请输入关键字
     </div>
-    <findShare :list='shareList' />
+    <shareList :list='shareList' />
     <div class="nomore">
       没有更多了
     </div>
@@ -13,11 +13,11 @@
 </template>
 <script>
 import { getShareListApi } from '@/api/find'
-import findShare from '@/components/findShare'
+import shareList from '@/components/shareList'
 export default {
   name: '',
   components: {
-    findShare
+    shareList
   },
   props: {},
   data () {

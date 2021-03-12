@@ -13,7 +13,12 @@
         </div>
       </template>
       <template #right>
-        {{ rightText }}
+        <div v-show='showSave'>
+          保存
+        </div>
+        <div v-show='showCard'>
+          答题卡
+        </div>
       </template>
     </van-nav-bar>
   </div>
@@ -24,7 +29,14 @@ export default {
   components: {},
   props: {
     title: String,
-    rightText: String
+    showSave: {
+      type: Boolean,
+      default: false
+    },
+    showCard: {
+      type: Boolean,
+      default: false
+    }
   },
   data () {
     return {}

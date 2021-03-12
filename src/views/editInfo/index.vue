@@ -1,9 +1,17 @@
 <template>
   <div class="edit_info">
-    <back :title='title_text' :rightText='rightText' @click-right='save'></back>
+    <back :title='title_text' :showSave='showSave' @click-right='save'></back>
     <!-- 头像 -->
     <div v-if='type === "avatar"'>
-      <van-uploader :before-read="beforeRead" :max-size="2 * 1024 * 1024" @oversize="onOversize" :after-read="afterRead" class="avatar" v-model="avatarList" :max-count="1" />
+      <van-uploader
+       :before-read="beforeRead"
+       :max-size="2 * 1024 * 1024"
+       @oversize="onOversize"
+       :after-read="afterRead"
+       @delete='del'
+       class="avatar"
+       v-model="avatarList"
+       :max-count="1" />
     </div>
     <!-- 昵称或简介或职位 -->
     <div v-else class="input_content">
@@ -25,7 +33,7 @@ export default {
       type: '',
       title_text: '',
       avatarList: [],
-      rightText: '',
+      showSave: false,
       inputVal: '',
       avatarId: ''
     }
@@ -35,11 +43,14 @@ export default {
   },
   watch: {},
   created () {
-    // console.log(this.$route.query.type)
     this.type = this.$route.query.type
     this.title_text = this.type === 'avatar' ? '修改头像' : this.type === 'nickname' ? '修改昵称' : this.type === 'intro' ? '修改简介' : '修改职位'
-    this.avatarList.push({ url: process.env.VUE_APP_BASEURL + this.userInfo.avatar })
-    this.inputVal = this.type === 'nickname' ? this.userInfo.nickname : this.type === 'intro' ? this.userInfo.intro : this.userInfo.position
+    if (this.type === 'avatar') {
+      this.avatarList.push({ url: process.env.VUE_APP_BASEURL + this.userInfo.avatar })
+    } else {
+      this.inputVal = this.userInfo[this.type]
+    }
+    // this.inputVal = this.type === 'nickname' ? this.userInfo.nickname : this.type === 'intro' ? this.userInfo.intro : this.userInfo.position
   },
   mounted () {},
   methods: {
@@ -72,11 +83,14 @@ export default {
           file.message = '上传成功!'
           this.avatarId = res.data[0].id
           // 上传成功后显示保存按钮
-          this.rightText = '保存'
+          this.showSave = true
         }
       } catch (err) {
         console.log(err)
       }
+    },
+    del () {
+      this.showSave = false
     },
     // 点击保存
     async save () {
@@ -98,7 +112,7 @@ export default {
     },
     // 当输入框内的值改变后显示保存按钮
     inputChange () {
-      this.rightText = '保存'
+      this.showSave = true
     },
     // 修改文本类的信息,avatar 头像， nickname 昵称， intro 简介， position 职位
     async editTextValue () {

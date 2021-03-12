@@ -3,6 +3,8 @@
     <van-list
       v-model="loading"
       :finished="finished"
+      :immediate-check='false'
+      offset='0'
       finished-text="我的有底线的~"
       @load="onLoad"
     >
@@ -96,6 +98,7 @@ export default {
         .text{
           margin-left: 10px;
           line-height: 18px;
+          width: 100px;
           .nickname{
             color: #545671;
             margin-bottom: 10px;

@@ -3,10 +3,12 @@
     <van-list
       v-model="loading"
       :finished="finished"
+      :immediate-check='false'
+      offset='0'
       finished-text="我的有底线的~"
       @load="onLoad"
     >
-      <div class="comment_item" v-for='item in list' :key='item.id'>
+      <div class="comment_item" @click='reply(item.id, item.author.nickname)' v-for='item in list' :key='item.id' >
         <!-- 顶部 -->
         <div class="item_header">
           <div class="header_left">
@@ -24,7 +26,7 @@
           </div>
           <div class="header_right">
             {{ item.star }}
-            <i @click='star(item.id)' class="iconfont iconbtn_dianzan_big_nor"></i>
+            <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_big_nor"></i>
           </div>
         </div>
         <!-- 评论内容 -->
@@ -79,6 +81,9 @@ export default {
     },
     onLoad () {
       this.$emit('load')
+    },
+    reply (id, name) {
+      this.$emit('reply', { id, name })
     }
   }
 }

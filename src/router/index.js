@@ -31,28 +31,33 @@ const routes = [
         path: '/my',
         component: () => import('@/views/my'),
         meta: {
-          needLogin: true
+          needLogin: true,
+          // 是否需要显示tabbar
+          needTabbar: true
         }
       },
       {
         path: '/find',
         component: () => import('@/views/find'),
         meta: {
-          needLogin: false
+          needLogin: false,
+          needTabbar: true
         }
       },
       {
         path: '/question',
         component: () => import('@/views/question'),
         meta: {
-          needLogin: true
+          needLogin: true,
+          needTabbar: true
         }
       },
       {
         path: '/company',
         component: () => import('@/views/company'),
         meta: {
-          needLogin: false
+          needLogin: false,
+          needTabbar: true
         }
       },
       {
@@ -78,15 +83,15 @@ const routes = [
         }
       },
       {
-        path: '/technicList',
-        component: () => import('@/views/technicList'),
+        path: '/technic',
+        component: () => import('@/views/technic'),
         meta: {
           needLogin: false
         }
       },
       {
-        path: '/shareList',
-        component: () => import('@/views/shareList'),
+        path: '/share',
+        component: () => import('@/views/share'),
         meta: {
           needLogin: false
         }
@@ -94,7 +99,7 @@ const routes = [
       {
         path: '/technicDetail/:id',
         component: () => import('@/views/technicDetail'),
-        props: false,
+        props: true,
         meta: {
           needLogin: false
         }
@@ -102,7 +107,7 @@ const routes = [
       {
         path: '/shareDetail/:id',
         component: () => import('@/views/shareDetail'),
-        props: false,
+        props: true,
         meta: {
           needLogin: false
         }
@@ -122,6 +127,30 @@ const routes = [
         }
       },
       {
+        path: '/companyPosition/:id',
+        component: () => import('@/views/companyPosition'),
+        props: true,
+        meta: {
+          needLogin: false
+        }
+      },
+      {
+        path: '/positionDetail/:id',
+        component: () => import('@/views/positionDetail'),
+        props: true,
+        meta: {
+          needLogin: false
+        }
+      },
+      {
+        path: '/companyQuestion/:id',
+        component: () => import('@/views/companyQuestion'),
+        props: true,
+        meta: {
+          needLogin: true
+        }
+      },
+      {
         path: '/',
         redirect: '/find'
       }
@@ -134,14 +163,6 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  // 需要显示tabbar的路由
-  const pathArr = ['/company', '/question', '/find', '/my']
-  // 只在4个tab里显示tabbar
-  if (pathArr.some(item => item === to.path)) {
-    store.commit('setIsTabbarShow', true)
-  } else {
-    store.commit('setIsTabbarShow', false)
-  }
   // token
   const token = getToken('hm_m_token')
   // 是否登录

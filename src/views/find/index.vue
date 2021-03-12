@@ -2,34 +2,30 @@
   <div class="find">
     <div class="find_title">发现</div>
     <!-- 面试技巧 -->
-    <div class="find_skill">
-      <van-cell @click='toTechnicList' title="面试技巧" is-link value="查看更多" />
-      <findTechnic :list='technicList' />
-    </div>
+    <van-cell @click='toTechnic' title="面试技巧" is-link value="查看更多" />
+    <technicList :list='technicList' />
     <!-- 市场数据 -->
-    <div class="find_data">
-      <van-cell @click='toChart' title="市场数据" is-link value="查看更多" />
-      <findData :data='dataObj' />
-    </div>
+    <van-cell @click='toChart' title="市场数据" is-link value="查看更多" />
+    <Data ref='data' :data='dataObj' />
     <!-- 面经分享 -->
-    <div class="find_share">
-      <van-cell @click='toShare' title="面经分享" is-link value="查看更多" />
-      <findShare :list='shareList' />
-    </div>
+    <van-cell @click='toShare' title="面经分享" is-link value="查看更多" />
+    <shareList :list='shareList' />
   </div>
 </template>
 <script>
-import findTechnic from '@/components/findTechnic'
-import findShare from '@/components/findShare'
-import findData from '@/components/findData'
-import { getTechnicListApi, getShareListApi, getHotDataApi } from '@/api/find'
+import technicList from '@/components/technicList'
+import shareList from '@/components/shareList'
+import Data from '@/components/data'
+import { getTechnicListApi, getShareListApi } from '@/api/find'
+import { getHotDataApi } from '@/api/data'
 import eventbus from '@/utils/eventbus'
 
 export default {
+  name: 'find',
   components: {
-    findTechnic,
-    findShare,
-    findData
+    technicList,
+    shareList,
+    Data
   },
   props: {},
   data () {
@@ -57,14 +53,14 @@ export default {
   },
   mounted () {},
   methods: {
-    toTechnicList () {
-      this.$router.push('/technicList')
+    toTechnic () {
+      this.$router.push('/technic')
     },
     toChart () {
       this.$router.push('/chart')
     },
     toShare () {
-      this.$router.push('/shareList')
+      this.$router.push('/share')
     },
     // 获取面试技巧数据
     getTechnicData () {
@@ -94,6 +90,8 @@ export default {
         .then(res => {
           // console.log(res.data)
           this.dataObj = res.data.data
+          this.$refs.data.dataArr = res.data.data.yearSalary.reverse()
+          this.$refs.data.yearArr = this.$refs.data.dataArr.slice(0, 5)
         })
         .catch(err => {
           console.log(err)
@@ -104,7 +102,7 @@ export default {
 </script>
 <style scoped lang='less'>
   .find{
-    margin-bottom: 40px;
+    padding-bottom: 55px;
     .find_title{
       text-align: center;
       height: 40px;
@@ -113,6 +111,12 @@ export default {
       font-weight: 600;
       color: #222;
       line-height: 40px;
+    }
+    /deep/ .van-cell__title{
+      span{
+        font-size: 22px;
+        font-weight: 600;
+      }
     }
   }
 </style>

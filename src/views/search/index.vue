@@ -42,20 +42,20 @@
       </div>
     </div>
     <!-- 面试技巧列表 -->
-    <findTechnic :list='technicList' v-if='type === "technic"'/>
+    <technicList :list='technicList' v-if='type === "technic"'/>
     <!-- 面经分享列表 -->
-    <findShare :list='shareList' v-if='type === "share"'/>
+    <shareList :list='shareList' v-if='type === "share"'/>
   </div>
 </template>
 <script>
 import { getShareListApi, getTechnicListApi, getTechnicTopApi, getShareTopApi } from '@/api/find'
-import findShare from '@/components/findShare'
-import findTechnic from '@/components/findTechnic'
+import shareList from '@/components/shareList'
+import technicList from '@/components/technicList'
 export default {
   name: '',
   components: {
-    findShare,
-    findTechnic
+    shareList,
+    technicList
   },
   props: {},
   data () {

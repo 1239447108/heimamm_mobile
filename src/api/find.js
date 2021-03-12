@@ -30,13 +30,6 @@ export const getShareDetailApi = data => {
   })
 }
 
-export const getHotDataApi = () => {
-  return request({
-    url: '/chart-data/hot',
-    needToken: false
-  })
-}
-
 export const starArticleByIdApi = data => {
   return request({
     url: '/articles/star',

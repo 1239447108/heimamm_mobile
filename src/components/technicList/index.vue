@@ -17,6 +17,7 @@
           </div>
           <!-- 点赞 -->
           <div class="item_star">
+            <!-- <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor" :class='{ acvive: isStared(item.behaviors) }'></i> -->
             <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor"></i>
             {{ item.star }}
           </div>
@@ -30,7 +31,8 @@
 </template>
 <script>
 import { starArticleByIdApi } from '@/api/find'
-import eventbus from '@/utils/eventbus'
+// import eventbus from '@/utils/eventbus'
+import { mapState } from 'vuex'
 export default {
   name: '',
   components: {},
@@ -42,7 +44,9 @@ export default {
       baseUrl: process.env.VUE_APP_BASEURL
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['userInfo'])
+  },
   watch: {},
   created () {
   },
@@ -52,14 +56,24 @@ export default {
       this.$router.push('/technicDetail/' + id)
     },
     async star (id) {
-      const { data: res } = await starArticleByIdApi({ article: id })
-      // console.log(res)
-      if (res.code === 200) {
-        this.$toast('操作成功!')
-        eventbus.$emit('get-technic-data')
-      } else {
-        this.$toast('点赞失败!')
+      try {
+        const { data: res } = await starArticleByIdApi({ article: id })
+        console.log(res)
+        this.$parent.getTechnicData()
+      } catch (err) {
+        console.log(err)
       }
+    },
+    // 判断是否被当前用户点赞,将该文章的behavior数组传入即可
+    isStared (arr) {
+      let res = false
+      if (arr.length === 0 || !this.userInfo.id) return false
+      arr.forEach(item => {
+        if (item.type === 'star' && item.user === this.userInfo.id) {
+          res = true
+        }
+      })
+      return res
     }
   }
 }
@@ -103,16 +117,17 @@ export default {
           .item_star{
             display: flex;
             align-items: center;
+            .active{
+              color: #f00;
+            }
           }
         }
       }
       .item_cover{
         margin-left: 15px;
-        width: 100px;
-        height: 60px;
         img{
-          width: 100%;
-          height: 100%;
+          width: 113px;
+          height: 75px;
         }
       }
     }

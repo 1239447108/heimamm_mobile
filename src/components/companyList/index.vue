@@ -1,6 +1,7 @@
 <template>
   <div class="list">
     <van-list
+    v-show='list.length > 0'
       v-model="loading"
       :finished="finished"
       :immediate-check='false'
