@@ -28,8 +28,8 @@
     <!-- 底部工具栏 -->
     <footer v-show='showCardBtn'>
       <div class="left">
-        <div class="item">
-          <i class="iconfont iconbtn_shoucang_nor"></i>
+        <div class="item" @click='collect'>
+          <i class="iconfont iconbtn_shoucang_nor" :class='{ active: userInfo && userInfo.collectQuestions.includes(question.id) }'></i>
           收藏
         </div>
         <div class="item">
@@ -75,7 +75,8 @@
 </template>
 <script>
 import { getCompanyFiltersApi, getCompanyQuestionApi } from '@/api/company'
-import { submitQuestionApi, getQuestionDetailApi } from '@/api/question'
+import { submitQuestionApi, getQuestionDetailApi, collectQuestionApi } from '@/api/question'
+import { mapState, mapActions } from 'vuex'
 import question from '@/components/question'
 import Vue from 'vue'
 import { Dialog } from 'vant'
@@ -140,6 +141,7 @@ export default {
     }
   },
   computed: {
+    ...mapState(['userInfo']),
     // 提交按钮是否被禁用
     isSubmitBtnDisabled () {
       if (this.questionList.length === 0) return true
@@ -161,6 +163,7 @@ export default {
   },
   mounted () {},
   methods: {
+    ...mapActions(['getUserInfoByVuex']),
     // 获取筛选信息
     async getCompanyFilter () {
       try {
@@ -191,6 +194,9 @@ export default {
         // console.log(res)
         // 将请求的列表存入题目列表中
         this.questionList = res.data
+        // this.questionList.forEach(item => {
+        //   item.isAnswered = false
+        // })
         // 将第一题的信息存入当前题目中
         this.question = res.data[0]
       } catch (err) {
@@ -272,6 +278,16 @@ export default {
         .catch(() => {
 
         })
+    },
+    // 收藏面试题
+    async collect () {
+      try {
+        const { data: res } = await collectQuestionApi(this.question.id)
+        console.log(res)
+        this.getUserInfoByVuex()
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
 }
@@ -400,6 +416,9 @@ export default {
           i{
             margin-bottom: 5px;
             font-size: 32px;
+          }
+          i.active{
+            color: #E40137;
           }
         }
       }

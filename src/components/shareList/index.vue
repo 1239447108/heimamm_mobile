@@ -28,7 +28,7 @@
           </div>
           <!-- 点赞 -->
           <div class="item_star">
-            <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor"></i>
+            <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: userInfo && userInfo.starArticles.includes(item.id) }'></i>
             {{ item.star }}
           </div>
         </div>
@@ -38,7 +38,7 @@
 </template>
 <script>
 import { starArticleByIdApi } from '@/api/find'
-import eventbus from '@/utils/eventbus'
+import { mapState, mapActions } from 'vuex'
 export default {
   name: '',
   components: {},
@@ -50,22 +50,25 @@ export default {
       baseUrl: process.env.VUE_APP_BASEURL
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['userInfo'])
+  },
   watch: {},
   created () {},
   mounted () {},
   methods: {
+    ...mapActions(['getUserInfoByVuex']),
     toShareDetail (id) {
       this.$router.push('/shareDetail/' + id)
     },
     async star (id) {
-      const { data: res } = await starArticleByIdApi({ article: id })
-      console.log(res)
-      if (res.code === 200) {
-        this.$toast('操作成功!')
-        eventbus.$emit('get-share-data')
-      } else {
-        this.$toast('点赞失败!')
+      try {
+        const { data: res } = await starArticleByIdApi({ article: id })
+        console.log(res)
+        this.$parent.getTechnicData()
+        this.getUserInfoByVuex()
+      } catch (err) {
+        console.log(err)
       }
     }
   }
@@ -145,6 +148,9 @@ export default {
           .item_star{
             display: flex;
             align-items: center;
+            .active{
+              color: #f00;
+            }
           }
         }
       }

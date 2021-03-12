@@ -22,3 +22,14 @@ export const getQuestionDetailApi = id => {
     needToken: true
   })
 }
+
+export const collectQuestionApi = id => {
+  return request({
+    url: '/questions/collect',
+    method: 'POST',
+    data: {
+      id
+    },
+    needToken: true
+  })
+}
