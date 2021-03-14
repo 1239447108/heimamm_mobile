@@ -9,7 +9,8 @@ export default new Vuex.Store({
     // 是否登录
     isLogin: false,
     // 用户信息
-    userInfo: null
+    userInfo: null,
+    questionInfo: null
   },
   mutations: {
     setIsLogin (state, isLogin) {
@@ -17,6 +18,9 @@ export default new Vuex.Store({
     },
     setUserInfo (state, info) {
       state.userInfo = info
+    },
+    setQuestionInfo (state, payload) {
+      state.questionInfo = payload
     }
   },
   actions: {

@@ -151,6 +151,13 @@ const routes = [
         }
       },
       {
+        path: '/questionList',
+        component: () => import('@/views/questionList'),
+        meta: {
+          needLogin: true
+        }
+      },
+      {
         path: '/',
         redirect: '/find'
       }

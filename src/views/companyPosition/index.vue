@@ -16,7 +16,7 @@
       <van-dropdown-item @change='change' title='经验' v-model="experience" :options="expList" />
       <van-dropdown-item @change='change' title='待遇' v-model="salary" :options="salaryList" />
     </van-dropdown-menu>
-    <positionList ref='list' :list='positionList' @load='getMore' />
+    <positionList ref='list' :list='positionList' @load='getMore' @refresh='refresh' />
   </div>
 </template>
 <script>
@@ -136,8 +136,7 @@ export default {
     async getPosition () {
       try {
         const queryObj = {
-          start: this.start,
-          limit: 5
+          start: this.start
         }
         const { data: res } = await getCompanyPositionByIdApi(this.$route.params.id, queryObj)
         // console.log(res)
@@ -176,7 +175,6 @@ export default {
       this.$refs.list.finished = false
       this.$refs.list.loading = false
       const queryObj = {
-        limit: 5,
         start: this.start
       }
       if (this.type !== '' && this.type !== '全部') {
@@ -200,14 +198,19 @@ export default {
       this.getSortPosition()
     },
     getMore () {
-      if (this.start + 5 >= this.total) {
+      if (this.positionList.length >= this.total) {
         this.$refs.list.finished = true
-        this.$refs.list.loading = false
         return
-      } else {
-        this.start += 5
       }
+      this.start += 5
       this.getPosition()
+    },
+    refresh () {
+      this.positionList = []
+      this.start = 0
+      this.getPosition()
+      this.$refs.list.finished = false
+      this.$refs.list.isLoading = false
     }
   }
 }

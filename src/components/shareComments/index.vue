@@ -26,7 +26,7 @@
           </div>
           <div class="header_right">
             {{ item.star }}
-            <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_big_nor"></i>
+            <i @click.stop='star(item)' class="iconfont iconbtn_dianzan_big_nor" :class="{ active: userInfo && userInfo.starComments.includes(item.id) }"></i>
           </div>
         </div>
         <!-- 评论内容 -->
@@ -48,7 +48,7 @@
 </template>
 <script>
 import { starCommentByIdApi } from '@/api/find'
-import eventbus from '@/utils/eventbus'
+import { mapState, mapActions } from 'vuex'
 export default {
   name: '',
   components: {},
@@ -62,19 +62,24 @@ export default {
       finished: false
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['userInfo'])
+  },
   watch: {},
   created () {},
   mounted () {},
   methods: {
-    async star (id) {
+    ...mapActions(['getUserInfoByVuex']),
+    async star (item) {
       try {
-        const { data: res } = await starCommentByIdApi({ id })
-        // console.log(res)
-        if (res.code === 200) {
-          this.$toast('操作成功!')
-          eventbus.$emit('get-comment-data')
+        const { data: res } = await starCommentByIdApi({ id: item.id })
+        console.log(res)
+        if (res.data.num === 0) {
+          item.star -= 1
+        } else {
+          item.star += 1
         }
+        this.getUserInfoByVuex()
       } catch (err) {
         console.log(err)
       }
@@ -132,12 +137,16 @@ export default {
             font-size: 28px;
             margin-left: 5px;
           }
+          .active{
+            color: red;
+          }
         }
       }
       .item_content{
         padding: 10px 50px;
         font-size: 16px;
         font-family: PingFangSC, PingFangSC-Regular;
+        word-break: break-all;
         color: #181a39;
         line-height: 27px;
       }
@@ -152,7 +161,7 @@ export default {
         color: #545671;
         .reply{
           margin-top: 10px;
-          overflow: hidden;
+          word-break: break-all;
           .reply_nickname{
             font-weight: 600;
             margin-right: 10px;

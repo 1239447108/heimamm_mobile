@@ -5,10 +5,7 @@
       <i class="iconfont iconicon_search"></i>
       请输入关键字
     </div>
-    <technicList :list='technicList' />
-    <div class="nomore">
-      没有更多了
-    </div>
+    <technicList :list='technicList' ref='list' @load='getMore' @refresh='refresh' />
   </div>
 </template>
 <script>
@@ -22,26 +19,49 @@ export default {
   props: {},
   data () {
     return {
-      technicList: []
+      technicList: [],
+      total: 0,
+      // 起始索引
+      start: 0
     }
   },
   computed: {},
   watch: {},
   created () {
-    getTechnicListApi({ limit: 10 })
-      .then(res => {
-        // console.log(res.data)
-        if (res.data.code === 200) {
-          this.technicList = res.data.data.list
-        } else {
-          this.$toast('获取面试技巧数据失败!')
-        }
-      })
+    this.getTechnicList()
   },
   mounted () {},
   methods: {
+    async getTechnicList () {
+      try {
+        const { data: res } = await getTechnicListApi({ start: this.start })
+        // console.log(res)
+        this.technicList = [...this.technicList, ...res.data.list]
+        this.total = res.data.total
+        this.$refs.list.loading = false
+      } catch (err) {
+        console.log(err)
+      }
+    },
     toTechnicSearch () {
       this.$router.push('/search?type=technic')
+    },
+    // 上拉请求更多数据
+    getMore () {
+      if (this.technicList.length >= this.total) {
+        this.$refs.list.finished = true
+        return
+      }
+      this.start += 5
+      this.getTechnicList()
+    },
+    // 下拉刷新
+    refresh () {
+      this.technicList = []
+      this.start = 0
+      this.getTechnicList()
+      this.$refs.list.finished = false
+      this.$refs.list.isLoading = false
     }
   }
 }

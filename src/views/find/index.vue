@@ -3,13 +3,13 @@
     <div class="find_title">发现</div>
     <!-- 面试技巧 -->
     <van-cell @click='toTechnic' title="面试技巧" is-link value="查看更多" />
-    <technicList :list='technicList' />
+    <technicList :list='technicList' ref='technicList' />
     <!-- 市场数据 -->
     <van-cell @click='toChart' title="市场数据" is-link value="查看更多" />
     <Data ref='data' :data='dataObj' />
     <!-- 面经分享 -->
     <van-cell @click='toShare' title="面经分享" is-link value="查看更多" />
-    <shareList :list='shareList' />
+    <shareList :list='shareList' ref='shareList' />
   </div>
 </template>
 <script>
@@ -18,7 +18,6 @@ import shareList from '@/components/shareList'
 import Data from '@/components/data'
 import { getTechnicListApi, getShareListApi } from '@/api/find'
 import { getHotDataApi } from '@/api/data'
-import eventbus from '@/utils/eventbus'
 
 export default {
   name: 'find',
@@ -41,12 +40,6 @@ export default {
   computed: {},
   watch: {},
   created () {
-    eventbus.$on('get-technic-data', () => {
-      this.getTechnicData()
-    })
-    eventbus.$on('get-share-data', () => {
-      this.getShareData()
-    })
     this.getTechnicData()
     this.getShareData()
     this.getHotData()
@@ -68,6 +61,8 @@ export default {
         .then(res => {
           // console.log(res.data)
           this.technicList = res.data.data.list
+          this.$refs.technicList.finished = true
+          this.$refs.technicList.disabled = true
         })
         .catch(err => {
           console.log(err)
@@ -79,6 +74,8 @@ export default {
         .then(res => {
           // console.log(res.data)
           this.shareList = res.data.data.list
+          this.$refs.shareList.finished = true
+          this.$refs.shareList.disabled = true
         })
         .catch(err => {
           console.log(err)

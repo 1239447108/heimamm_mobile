@@ -13,3 +13,11 @@ export const getDataIndexApi = () => {
     needToken: false
   })
 }
+
+export const getChartDataApi = params => {
+  return request({
+    url: '/chart-data/statistics',
+    params,
+    needToken: false
+  })
+}

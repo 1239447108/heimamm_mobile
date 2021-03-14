@@ -88,7 +88,7 @@
       </van-popup>
     </div>
     <!-- 公司列表 -->
-    <companyList ref='list' :list='list' @load='getMore' />
+    <companyList ref='list' :list='list' @load='getMore' @refresh='refresh' />
   </div>
 </template>
 <script>
@@ -126,7 +126,6 @@ export default {
   methods: {
     async getCompanyList () {
       const queryObj = {
-        limit: 5,
         start: this.start,
         q: this.searchValue.trim(),
         scoreRange: this.scoreRange
@@ -180,14 +179,20 @@ export default {
     },
     // 上拉请求更多数据
     getMore () {
-      if (this.start + 5 > this.total) {
+      if (this.list.length >= this.total) {
         this.$refs.list.finished = true
-        this.$refs.list.loading = false
         return
-      } else {
-        this.start += 5
       }
+      this.start += 5
       this.getCompanyList()
+    },
+    // 下拉刷新
+    refresh () {
+      this.list = []
+      this.start = 0
+      this.getCompanyList()
+      this.$refs.list.finished = false
+      this.$refs.list.isLoading = false
     },
     // 通过条件搜索
     async getSearchData (val) {
@@ -196,7 +201,6 @@ export default {
       this.$refs.list.loading = false
       const queryObj = {
         q: val,
-        limit: 5,
         start: this.start,
         scoreRange: this.scoreRange
       }

@@ -5,7 +5,7 @@
       <i class="iconfont iconicon_search"></i>
       请输入关键字
     </div>
-    <shareList :list='shareList' />
+    <shareList :list='shareList' ref='list' @load='getMore' @refresh='refresh' />
     <div class="nomore">
       没有更多了
     </div>
@@ -22,26 +22,49 @@ export default {
   props: {},
   data () {
     return {
-      shareList: []
+      shareList: [],
+      total: 0,
+      // 起始索引
+      start: 0
     }
   },
   computed: {},
   watch: {},
   created () {
-    getShareListApi({ limit: 10 })
-      .then(res => {
-        // console.log(res.data)
-        if (res.data.code === 200) {
-          this.shareList = res.data.data.list
-        } else {
-          this.$toast('获取面经分享数据失败!')
-        }
-      })
+    this.getShareList()
   },
   mounted () {},
   methods: {
+    async getShareList () {
+      try {
+        const { data: res } = await getShareListApi({ start: this.start })
+        // console.log(res)
+        this.shareList = [...this.shareList, ...res.data.list]
+        this.total = res.data.total
+        this.$refs.list.loading = false
+      } catch (err) {
+        console.log(err)
+      }
+    },
     toShareSearch () {
       this.$router.push('/search?type=share')
+    },
+    // 上拉请求更多数据
+    getMore () {
+      if (this.shareList.length >= this.total) {
+        this.$refs.list.finished = true
+        return
+      }
+      this.start += 5
+      this.getShareList()
+    },
+    // 下拉刷新
+    refresh () {
+      this.shareList = []
+      this.start = 0
+      this.getShareList()
+      this.$refs.list.finished = false
+      this.$refs.list.isLoading = false
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <keep-alive include="find">
+    <keep-alive include="find,question">
       <router-view></router-view>
     </keep-alive>
     <van-tabbar v-show='$route.meta.needTabbar' v-model="activeIndex" active-color="#fe001b" route>

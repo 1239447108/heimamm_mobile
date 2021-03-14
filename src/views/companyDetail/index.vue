@@ -386,14 +386,14 @@ export default {
         console.log(err)
       }
     },
+    // 加载更多
     getMore () {
-      if (this.start + 5 >= this.total) {
+      // 已加载完
+      if (this.commentList.length >= this.total) {
         this.$refs.list.finished = true
-        this.$refs.list.loading = false
         return
-      } else {
-        this.start += 5
       }
+      this.start += 5
       this.getComment()
     },
     toPosition () {
@@ -406,7 +406,7 @@ export default {
       if (this.positions.length === 0) {
         try {
         // 将全部岗位都获取
-          const { data: res } = await getCompanyPositionByIdApi(this.$route.params.id, { limit: 100 })
+          const { data: res } = await getCompanyPositionByIdApi(this.$route.params.id, { limit: 9999 })
           // console.log(res)
           // const arr = []
           res.data.list.forEach(position => {

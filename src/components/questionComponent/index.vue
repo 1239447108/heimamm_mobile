@@ -1,5 +1,5 @@
 <template>
-  <div class="question">
+  <div class="question" v-if='question.detail.type'>
     <!-- 单选 -->
     <div v-if='question.detail.type === 1'>
       <div class="title">
@@ -11,17 +11,8 @@
         </div>
       </div>
       <!-- 单选选项 -->
-      <div @click='sin_click("A")' class="item" :class="{ active: singleAnswer === 'A', green: question.analysis && question.analysis.singleAnswer === 'A', red: question.analysis && question.analysis.singleAnswer !== 'A' }">
-        A. {{ question.detail.option[0] }}
-      </div>
-      <div @click='sin_click("B")' class="item" :class="{ active: singleAnswer === 'B', green: question.analysis && question.analysis.singleAnswer === 'B', red: question.analysis && question.analysis.singleAnswer !== 'B' }">
-        B. {{ question.detail.option[1] }}
-      </div>
-      <div @click='sin_click("C")' class="item" :class="{ active: singleAnswer === 'C', green: question.analysis && question.analysis.singleAnswer === 'C', red: question.analysis && question.analysis.singleAnswer !== 'C' }">
-        C. {{ question.detail.option[2] }}
-      </div>
-      <div @click='sin_click("D")' class="item" :class="{ active: singleAnswer === 'D', green: question.analysis && question.analysis.singleAnswer === 'D', red: question.analysis && question.analysis.singleAnswer !== 'D' }">
-        D. {{ question.detail.option[3] }}
+      <div @click='sin_click(item)' v-for='(item, index) in options' :key='item' class="item" :class="{ active: singleAnswer === item, green: question.isAnswered && question.analysis.singleAnswer === item, red: question.isAnswered && question.analysis.singleAnswer !== item }">
+        {{ item }}. {{ question.detail.option[index] }}
       </div>
     </div>
     <!-- 多选 -->
@@ -35,17 +26,8 @@
         </div>
       </div>
       <!-- 多选选项 -->
-      <div @click='mul_click("A")' class="item" :class="{ active: multipleAnswer.includes('A'), green: question.analysis && question.analysis.multipleAnswer.includes('A'), red: question.analysis && !question.analysis.multipleAnswer.includes('A') }">
-        A. {{ question.detail.option[0] }}
-      </div>
-      <div @click='mul_click("B")' class="item" :class="{ active: multipleAnswer.includes('B'), green: question.analysis && question.analysis.multipleAnswer.includes('B'), red: question.analysis && !question.analysis.multipleAnswer.includes('B') }">
-        B. {{ question.detail.option[1] }}
-      </div>
-      <div @click='mul_click("C")' class="item" :class="{ active: multipleAnswer.includes('C'), green: question.analysis && question.analysis.multipleAnswer.includes('C'), red: question.analysis && !question.analysis.multipleAnswer.includes('C') }">
-        C. {{ question.detail.option[2] }}
-      </div>
-      <div @click='mul_click("D")' class="item" :class="{ active: multipleAnswer.includes('D'), green: question.analysis && question.analysis.multipleAnswer.includes('D'), red: question.analysis && !question.analysis.multipleAnswer.includes('D') }">
-        D. {{ question.detail.option[3] }}
+      <div @click='mul_click(item)' v-for='(item, index) in options' :key='item' class="item" :class="{ active: multipleAnswer.includes(item), green: question.isAnswered && question.analysis.multipleAnswer.includes(item), red: question.isAnswered && !question.analysis.multipleAnswer.includes(item) }">
+        {{ item }}. {{ question.detail.option[index] }}
       </div>
     </div>
     <!-- 简答 -->
@@ -101,6 +83,7 @@ export default {
   },
   data () {
     return {
+      options: ['A', 'B', 'C', 'D'],
       // 单选题答案
       singleAnswer: '',
       // 多选题答案
@@ -110,7 +93,8 @@ export default {
   computed: {},
   watch: {
   },
-  created () {},
+  created () {
+  },
   mounted () {},
   methods: {
     // 点击单选选项
@@ -169,7 +153,7 @@ export default {
       position: relative;
       box-sizing: border-box;
       width: 326px;
-      height: 50px;
+      min-height: 50px;
       margin: 10px auto;
       padding: 10px 40px 10px 10px;
       display: flex;

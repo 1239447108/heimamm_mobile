@@ -87,3 +87,14 @@ export const sendCommentByIdApi = data => {
     needToken: true
   })
 }
+
+export const collectShareApi = id => {
+  return request({
+    url: '/articles/collect',
+    method: 'POST',
+    data: {
+      id
+    },
+    needToken: true
+  })
+}

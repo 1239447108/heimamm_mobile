@@ -2,17 +2,25 @@
   <div class="question">
     <header>
       面试宝典
-      <!-- <span @click='isCityPickerShow = true'>
-        北京
-      </span> -->
       <van-dropdown-menu>
-        <van-dropdown-item v-model="city" :options="cities" />
+        <van-dropdown-item ref='city' v-model="city" :title='city' >
+          <template #default>
+            <van-index-bar :sticky='false'>
+              <van-index-anchor :index="key" v-for='(value, key) in citys' :key='key'>
+                {{ key }}
+                <h3 @click='changeCity(city)' v-for='city in value' :key='city'>
+                  {{ city }}
+                </h3>
+              </van-index-anchor>
+            </van-index-bar>
+          </template>
+        </van-dropdown-item>
       </van-dropdown-menu>
     </header>
     <div class="scroll_box">
       <div class="scroll_content">
-        <span @click='curPositionIndex = index' v-for='(position, index) in positions' :key='index' :class="{ active: index === curPositionIndex }">
-          {{ position }}
+        <span @click='positionId = position.id' v-for='(position, index) in positions' :key='index' :class="{ active: position.id === positionId }">
+          {{ position.name }}
         </span>
       </div>
     </div>
@@ -35,7 +43,27 @@
           </div>
         </div>
       </div>
-      <div id="chart"></div>
+      <div id="chart">
+        <van-circle
+          v-model="currentRate"
+          :rate="rate"
+          :speed="100"
+          :stroke-width="80"
+          layer-color="#ebedf0"
+          text="颜色定制"
+        >
+          <template #default>
+            <div class="circle_text">
+              <span>
+                顺序刷题
+              </span>
+              <span>
+                70 / 126
+              </span>
+            </div>
+          </template>
+        </van-circle>
+      </div>
       <div class="center_box">
         <div class="center_item">
           <div class="item_icon color3">
@@ -64,135 +92,66 @@
       </div>
     </div>
     <div class="btn">
-      <van-button color='#00B8D4' block>模拟面试</van-button>
+      <van-button @click='start' color='#00B8D4' block>模拟面试</van-button>
     </div>
   </div>
 </template>
 <script>
-import { Chart } from '@antv/g2'
 import { getQuestionFiltersApi } from '@/api/question'
+import { mapMutations } from 'vuex'
 export default {
-  name: '',
+  name: 'question',
   components: {},
   props: {},
   data () {
     return {
-      city: 0,
-      cities: [
-        {
-          text: '北京',
-          value: 0
-        },
-        {
-          text: '上海',
-          value: 1
-        },
-        {
-          text: '深圳',
-          value: 2
-        }
-      ],
+      city: '全国',
       citys: [],
       positions: [
-        '服务端',
-        '前端',
-        '网络',
-        '运维',
-        '技术',
-        '美工'
       ],
+      positionId: '',
       curPositionIndex: 0,
       cityPositions: [],
       isCityPickerShow: false,
-      indexList: [1, 2, 3, 4]
+      indexList: [1, 2, 3, 4],
+      currentRate: 0
     }
   },
-  computed: {},
+  computed: {
+    rate () {
+      return ((70 / 126) * 100).toFixed(0)
+    }
+  },
   watch: {},
   created () {
     this.getQuestionFilter()
   },
   mounted () {
-    const data = [
-      { type: '顺序刷题', value: 56.4 }
-    ]
-    const num1 = 70
-    const num2 = 126
-    const chart = new Chart({
-      container: 'chart',
-      autoFit: true
-    })
-    chart.data(data)
-    chart.legend(false)
-    chart.tooltip({
-      showMarkers: false
-    })
-    chart.facet('rect', {
-      fields: ['type'],
-      padding: 20,
-      showTitle: false,
-      eachView: (view, facet) => {
-        const data = facet.data
-        let color
-        if (data[0].type === '顺序刷题') {
-          color = '#00B8D4'
-        } else {
-          color = '#f0657d'
-        }
-        data.push({ type: '其他', value: 126 - data[0].value })
-        view.data(data)
-        view.coordinate('theta', {
-          radius: 0.8,
-          innerRadius: 0.8
-        })
-        view
-          .interval()
-          .adjust('stack')
-          .position('value')
-          .color('type', [color, 'pink'])
-          .style({
-            opacity: 1
-          })
-        view.annotation().text({
-          position: ['50%', '50%'],
-          content: data[0].type,
-          style: {
-            fontSize: 12,
-            fill: '#000',
-            fontWeight: 300,
-            textBaseline: 'bottom',
-            textAlign: 'center'
-          },
-          offsetY: -12
-        })
-
-        view.annotation().text({
-          position: ['50%', '50%'],
-          content: num1 + '/' + num2,
-          style: {
-            fontSize: 18,
-            fill: '#000',
-            fontWeight: 500,
-            textAlign: 'center'
-          },
-          offsetY: 10
-        })
-
-        view.interaction('element-active')
-      }
-    })
-    chart.render()
   },
   methods: {
+    ...mapMutations(['setQuestionInfo']),
     async getQuestionFilter () {
       try {
         const { data: res } = await getQuestionFiltersApi()
-        console.log(res)
+        // console.log(res)
         this.citys = res.data.citys
         this.cityPositions = res.data.cityPositions
+        this.positions = this.cityPositions['全国']
+        this.positionId = this.positions[0].id
       } catch (err) {
         console.log(err)
       }
+    },
+    changeCity (city) {
+      this.city = city
+      this.$refs.city.toggle()
+      this.positions = this.cityPositions[city]
+      this.positionId = this.positions[0].id
+    },
+    start () {
+      this.setQuestionInfo({ type: 'interview', params: { type: this.positionId, city: this.city } })
+      this.$router.push('/questionList')
+      // this.$router.push('/interview?type=' + this.positionId + '&city=' + this.city)
     }
   }
 }
@@ -284,11 +243,28 @@ export default {
       }
       #chart{
         position: absolute;
-        top: 50%;
+        top: 40%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 160px;
-        height: 160px;
+        width: 120px;
+        height: 120px;
+        .van-circle{
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(180deg,#ff6f92, #e40137);
+          border-radius: 50%;
+          .circle_text{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px;
+            span{
+              font-size: 14px;
+              color: #fff;
+              margin-bottom: 5px;
+            }
+          }
+        }
       }
     }
     .count{

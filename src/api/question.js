@@ -33,3 +33,11 @@ export const collectQuestionApi = id => {
     needToken: true
   })
 }
+
+export const getInterviewApi = params => {
+  return request({
+    url: '/interview/questions',
+    params,
+    needToken: true
+  })
+}

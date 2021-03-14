@@ -41,13 +41,13 @@
         </div>
         <div class="tools">
           <!-- 收藏 -->
-          <div class="tool">
-            <i class="iconfont iconbtn_shoucang_nor"></i>
+          <div class="tool" @click='collect'>
+            <i class="iconfont iconbtn_shoucang_nor" :class="{ active: userInfo && userInfo.collectArticles.includes(detail.id) }"></i>
             {{ detail.collect }}
           </div>
           <!-- 点赞 -->
-          <div class="tool">
-            <i class="iconfont iconbtn_dianzan_big_nor"></i>
+          <div class="tool" @click='star'>
+            <i class="iconfont iconbtn_dianzan_big_nor" :class="{ active: userInfo && userInfo.starArticles.includes(detail.id) }"></i>
             {{ detail.star }}
           </div>
           <!-- 分享 -->
@@ -73,8 +73,8 @@
 </template>
 <script>
 import shareComments from '@/components/shareComments'
-import { getShareDetailApi, getShareCommentApi, sendCommentByIdApi } from '@/api/find'
-import eventbus from '@/utils/eventbus'
+import { getShareDetailApi, getShareCommentApi, sendCommentByIdApi, collectShareApi, starArticleByIdApi } from '@/api/find'
+import { mapState, mapActions } from 'vuex'
 export default {
   name: '',
   components: {
@@ -99,17 +99,17 @@ export default {
       replyId: ''
     }
   },
-  computed: {},
+  computed: {
+    ...mapState(['userInfo', 'isLogin'])
+  },
   watch: {},
   created () {
-    eventbus.$on('get-comment-data', () => {
-      this.getComment()
-    })
     this.getDetail()
     this.getComment()
   },
   mounted () {},
   methods: {
+    ...mapActions(['getUserInfoByVuex']),
     // 获取评论列表
     async getComment () {
       try {
@@ -134,6 +134,14 @@ export default {
         console.log(err)
       }
     },
+    // 验证是否已经登录
+    checkIsLogin () {
+      if (!this.isLogin) {
+        this.$toast.fail('您还没有登录哦~')
+        this.$router.push('/login?redirect=' + this.$route.path)
+        return false
+      }
+    },
     // 加载更多评论
     getMore () {
       if (this.start + 5 > this.total) {
@@ -146,6 +154,7 @@ export default {
     },
     // 发布评论
     async sendComment () {
+      this.checkIsLogin()
       const val = this.commentVal.trim()
       const queryObj = {
         article: this.$route.params.id,
@@ -173,6 +182,7 @@ export default {
     },
     // 回复评论
     reply (obj) {
+      this.checkIsLogin()
       const { id, name } = obj
       this.replyId = id
       this.placeHolderText = `回复 ${name}:`
@@ -182,6 +192,37 @@ export default {
     popClose () {
       this.commentVal = ''
       this.replyId = ''
+    },
+    // 收藏
+    async collect () {
+      this.checkIsLogin()
+      try {
+        const { data: res } = await collectShareApi(this.$route.params.id)
+        // console.log(res)
+        if (res.data.num === 0) {
+          this.detail.collect -= 1
+        } else {
+          this.detail.collect += 1
+        }
+        this.getUserInfoByVuex()
+      } catch (err) {
+        console.log(err)
+      }
+    },
+    async star () {
+      this.checkIsLogin()
+      try {
+        const { data: res } = await starArticleByIdApi({ article: this.$route.params.id })
+        // console.log(res)
+        if (res.data.num === 0) {
+          this.detail.star -= 1
+        } else {
+          this.detail.star += 1
+        }
+        this.getUserInfoByVuex()
+      } catch (err) {
+        console.log(err)
+      }
     }
   }
 }
@@ -289,6 +330,9 @@ export default {
             }
             i{
               font-size: 32px;
+            }
+            .active{
+              color: red;
             }
           }
         }

@@ -1,35 +1,37 @@
 <template>
   <div class="list">
-    <van-list
-      v-model="loading"
-      :finished="finished"
-      offset='0'
-      :immediate-check='false'
-      finished-text="我的有底线的~"
-      @load="onLoad"
-    >
-      <div class="item" @click='$router.push(`/positionDetail/` + position.id)' v-for='position in list' :key='position.id'>
-        <div class="header">
-          <div class="name">
-            {{ position.name }}
+    <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
+      <van-list
+        v-model="loading"
+        :finished="finished"
+        offset='0'
+        :immediate-check='false'
+        finished-text="我的有底线的~"
+        @load="onLoad"
+      >
+        <div class="item" @click='$router.push(`/positionDetail/` + position.id)' v-for='position in list' :key='position.id'>
+          <div class="header">
+            <div class="name">
+              {{ position.name }}
+            </div>
+            <div class="salary">
+              {{ position.salary }}
+            </div>
           </div>
-          <div class="salary">
-            {{ position.salary }}
+          <div class="tags">
+            <div class="tag">
+              {{ position.city }}
+            </div>
+            <div class="tag">
+              {{ position.experience }}
+            </div>
+            <div class="tag">
+              {{ position.education }}
+            </div>
           </div>
         </div>
-        <div class="tags">
-          <div class="tag">
-            {{ position.city }}
-          </div>
-          <div class="tag">
-            {{ position.experience }}
-          </div>
-          <div class="tag">
-            {{ position.education }}
-          </div>
-        </div>
-      </div>
-    </van-list>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 <script>
@@ -42,7 +44,8 @@ export default {
   data () {
     return {
       loading: false,
-      finished: false
+      finished: false,
+      isLoading: false
     }
   },
   computed: {},
@@ -52,6 +55,9 @@ export default {
   methods: {
     onLoad () {
       this.$emit('load')
+    },
+    onRefresh () {
+      this.$emit('refresh')
     }
   }
 }

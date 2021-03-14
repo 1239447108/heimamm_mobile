@@ -1,49 +1,51 @@
 <template>
   <div class="list">
-    <van-list
-    v-show='list.length > 0'
-      v-model="loading"
-      :finished="finished"
-      :immediate-check='false'
-      offset='0'
-      finished-text="到底了啦~"
-      @load="onLoad"
-    >
-      <div class="item" @click='toDetail(item.id)' v-for='item in list' :key="item.id">
-        <div class="icon">
-          <img :src="baseUrl + item.logo">
-        </div>
-        <div class="center">
-          <div class="header">
-            <div class="header_left">
-              <div class="name">
-                {{ item.name }}
+    <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
+      <van-list
+        v-show='list.length > 0'
+        v-model="loading"
+        :finished="finished"
+        :immediate-check='false'
+        offset='0'
+        finished-text="到底了啦~"
+        @load="onLoad"
+      >
+        <div class="item" @click='toDetail(item.id)' v-for='item in list' :key="item.id">
+          <div class="icon">
+            <img :src="baseUrl + item.logo">
+          </div>
+          <div class="center">
+            <div class="header">
+              <div class="header_left">
+                <div class="name">
+                  {{ item.name }}
+                </div>
+                <div class="address">
+                  {{ item.region }} {{ item.distance }}
+                </div>
               </div>
-              <div class="address">
-                {{ item.region }} {{ item.distance }}
+              <div class="score">
+                {{ item.score}}分
               </div>
             </div>
-            <div class="score">
-              {{ item.score}}分
+            <div class="tags">
+              <div class="tag">
+                {{ item.type }}
+              </div>
+              <div class="tag">
+                {{ item.step }}
+              </div>
+              <div class="tag">
+                {{ item.scale }}
+              </div>
             </div>
-          </div>
-          <div class="tags">
-            <div class="tag">
-              {{ item.type }}
+            <div class="footer">
+              在招职位: <span>{{ item.positions }}</span> / 最后更新时间: {{ item.updated_at.slice(0, 10) }}
             </div>
-            <div class="tag">
-              {{ item.step }}
-            </div>
-            <div class="tag">
-              {{ item.scale }}
-            </div>
-          </div>
-          <div class="footer">
-            在招职位: <span>{{ item.positions }}</span> / 最后更新时间: {{ item.updated_at.slice(0, 10) }}
           </div>
         </div>
-      </div>
-    </van-list>
+      </van-list>
+    </van-pull-refresh>
     <div v-show='list.length === 0' class="tip">
       ~暂无数据~
     </div>
@@ -60,7 +62,8 @@ export default {
     return {
       baseUrl: process.env.VUE_APP_BASEURL,
       loading: false,
-      finished: false
+      finished: false,
+      isLoading: false
     }
   },
   computed: {
@@ -74,8 +77,10 @@ export default {
       this.$router.push('/companyDetail/' + id)
     },
     onLoad () {
-      this.loading = true
       this.$emit('load')
+    },
+    onRefresh () {
+      this.$emit('refresh')
     }
   }
 }

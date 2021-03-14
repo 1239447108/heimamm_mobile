@@ -22,29 +22,20 @@
     <div v-show='technicList.length ===0 && shareList.length === 0' class="search_content">
       <div class="search_text">
         历史搜索
-        <span>
+        <span @click='clearHistory'>
           清空
         </span>
       </div>
       <div class="search_items">
-        <span class="search_tag" >
-          设计师面试
-        </span>
-        <span class="search_tag" >
-          前端面试
-        </span>
-        <span class="search_tag" >
-          后端面试
-        </span>
-        <span class="search_tag" >
-          运营面试
+        <span class="search_tag" v-for='tag in historyList' :key='tag'>
+          {{ tag }}
         </span>
       </div>
     </div>
     <!-- 面试技巧列表 -->
-    <technicList :list='technicList' v-if='type === "technic"'/>
+    <technicList :list='technicList' v-if='type === "technic"' ref='technic' />
     <!-- 面经分享列表 -->
-    <shareList :list='shareList' v-if='type === "share"'/>
+    <shareList :list='shareList' v-if='type === "share"' ref='share' />
   </div>
 </template>
 <script>
@@ -65,7 +56,10 @@ export default {
       searchValue: '',
       technicList: [],
       shareList: [],
-      topList: []
+      topList: [],
+      historyList: [],
+      start: 0,
+      total: 0
     }
   },
   computed: {},
@@ -90,7 +84,7 @@ export default {
     async getTechnicTopData () {
       try {
         const { data: res } = await getTechnicTopApi()
-        console.log(res)
+        // console.log(res)
         this.topList = res.data
       } catch (err) {
         console.log(err)
@@ -100,7 +94,7 @@ export default {
     async getShareTopData () {
       try {
         const { data: res } = await getShareTopApi()
-        console.log(res)
+        // console.log(res)
         this.topList = res.data
       } catch (err) {
         console.log(err)
@@ -110,16 +104,42 @@ export default {
       this.searchValue = item
       this.search()
     },
+    handleHistory (val) {
+      // 历史搜索的长度小于8
+      if (this.historyList.length < 8) {
+        if (!this.historyList.includes(val)) {
+          this.historyList.push(val)
+        }
+      } else {
+        // 长度大于8则去掉前一个，再加上新的
+        this.historyList.shift()
+        this.historyList.push(val)
+      }
+    },
+    clearHistory () {
+      this.historyList = []
+    },
     async search () {
       const val = this.searchValue.trim()
       if (val.length > 0) {
         // 面试技巧搜索
         if (this.type === 'technic') {
+          this.handleHistory(val)
           try {
             const { data: res } = await getTechnicListApi({ q: val, limit: 10 })
             // console.log(res)
             if (res.data.list.length > 0) {
-              this.technicList = res.data.list
+              // 搜索关键词标红
+              res.data.list.forEach(item => {
+                const str = `<span style='color: red'>${val}</span>`
+                // const reg = new RegExp('^' + val + '$', 'g')
+                // item.title = item.title.replace(reg, str)
+                item.title = item.title.replace(val, str)
+              })
+              this.technicList = [...this.technicList, ...res.data.list]
+              this.total = res.data.total
+              this.$refs.technic.finished = true
+              this.$refs.technic.disabled = true
             } else {
               this.$toast('暂无数据')
             }
@@ -132,7 +152,17 @@ export default {
             const { data: res } = await getShareListApi({ q: val, limit: 10 })
             // console.log(res)
             if (res.data.list.length > 0) {
-              this.shareList = res.data.list
+              // 搜索关键词标红
+              res.data.list.forEach(item => {
+                const str = `<span style='color: red'>${val}</span>`
+                // const reg = new RegExp('^' + val + '$', 'g')
+                // item.title = item.title.replace(reg, str)
+                item.title = item.title.replace(val, str)
+              })
+              this.shareList = [...this.shareList, ...res.data.list]
+              this.total = res.data.total
+              this.$refs.share.finished = true
+              this.$refs.share.disabled = true
             } else {
               this.$toast('暂无数据')
             }

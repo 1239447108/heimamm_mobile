@@ -1,39 +1,51 @@
 <template>
   <div class="share">
-    <div @click='toShareDetail(item.id)' class="share_item" v-for='item in list' :key='item.id'>
-      <div class="share_title">
-        {{ item.title }}
-      </div>
-      <div class="content">
-        {{ item.content }}
-      </div>
-      <div class="share_footer">
-        <div class="share_footer_user">
-          <div class="user_avatar">
-            <img :src="baseUrl + item.author.avatar">
+    <van-pull-refresh v-model="isLoading" @refresh="onRefresh" :disabled='disabled'>
+      <van-list
+        v-show='list.length > 0'
+        v-model="loading"
+        :finished="finished"
+        :immediate-check='false'
+        offset='0'
+        finished-text="到底了啦~"
+        @load="onLoad"
+      >
+        <div @click='toShareDetail(item.id)' class="share_item" v-for='item in list' :key='item.id'>
+          <div class="share_title" v-html='item.title'>
+            <!-- {{ item.title }} -->
           </div>
-          <div class="user_nickname">
-            {{ item.author.nickname }}
+          <div class="content">
+            {{ item.content }}
+          </div>
+          <div class="share_footer">
+            <div class="share_footer_user">
+              <div class="user_avatar">
+                <img :src="baseUrl + item.author.avatar">
+              </div>
+              <div class="user_nickname">
+                {{ item.author.nickname }}
+              </div>
+            </div>
+            <div class="share_footer_right">
+              <!-- 时间 -->
+              <div class="item_time">
+                {{ item.updated_at | relativeTime }}
+              </div>
+              <!-- 讨论 -->
+              <div class="item_comments">
+                <i class="iconfont iconicon_pinglunliang"></i>
+                {{ item.article_comments }}
+              </div>
+              <!-- 点赞 -->
+              <div class="item_star">
+                <i @click.stop='star(item)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: userInfo && userInfo.starArticles.includes(item.id) }'></i>
+                {{ item.star }}
+              </div>
+            </div>
           </div>
         </div>
-        <div class="share_footer_right">
-          <!-- 时间 -->
-          <div class="item_time">
-            {{ item.updated_at | relativeTime }}
-          </div>
-          <!-- 讨论 -->
-          <div class="item_comments">
-            <i class="iconfont iconicon_pinglunliang"></i>
-            {{ item.article_comments }}
-          </div>
-          <!-- 点赞 -->
-          <div class="item_star">
-            <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: userInfo && userInfo.starArticles.includes(item.id) }'></i>
-            {{ item.star }}
-          </div>
-        </div>
-      </div>
-    </div>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 <script>
@@ -47,11 +59,15 @@ export default {
   },
   data () {
     return {
-      baseUrl: process.env.VUE_APP_BASEURL
+      baseUrl: process.env.VUE_APP_BASEURL,
+      loading: false,
+      finished: false,
+      isLoading: false,
+      disabled: false
     }
   },
   computed: {
-    ...mapState(['userInfo'])
+    ...mapState(['userInfo', 'isLogin'])
   },
   watch: {},
   created () {},
@@ -61,15 +77,30 @@ export default {
     toShareDetail (id) {
       this.$router.push('/shareDetail/' + id)
     },
-    async star (id) {
+    async star (item) {
+      if (!this.isLogin) {
+        this.$toast.fail('您还没有登录哦~')
+        this.$router.push('/login?redirect=' + this.$route.path)
+        return
+      }
       try {
-        const { data: res } = await starArticleByIdApi({ article: id })
-        console.log(res)
-        this.$parent.getTechnicData()
+        const { data: res } = await starArticleByIdApi({ article: item.id })
+        // console.log(res)
+        if (res.data.num === 0) {
+          item.star -= 1
+        } else {
+          item.star += 1
+        }
         this.getUserInfoByVuex()
       } catch (err) {
         console.log(err)
       }
+    },
+    onLoad () {
+      this.$emit('load')
+    },
+    onRefresh () {
+      this.$emit('refresh')
     }
   }
 }
@@ -78,6 +109,8 @@ export default {
   .share{
     .share_item{
       padding: 15px;
+      margin-top: 20px;
+      margin-bottom: 30px;
       .share_title{
         font-size: 16px;
         color: #181A39;

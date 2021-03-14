@@ -1,37 +1,47 @@
 <template>
   <div class="technic">
-    <div class="technic_item" @click='toDetail(item.id)' v-for='item in list' :key='item.id'>
-      <div class="item_left">
-        <div class="item_title">
-          {{ item.title }}
+    <van-pull-refresh v-model="isLoading" @refresh="onRefresh" :disabled='disabled'>
+      <van-list
+        v-show='list.length > 0'
+        v-model="loading"
+        :finished="finished"
+        :immediate-check='false'
+        offset='0'
+        finished-text="到底了啦~"
+        @load="onLoad"
+      >
+        <div class="technic_item" @click='toDetail(item.id)' v-for='item in list' :key='item.id'>
+          <div class="item_left">
+            <div class="item_title" v-html='item.title'>
+              <!-- {{ item.title }} -->
+            </div>
+            <div class="item_footer">
+              <!-- 时间 -->
+              <div class="item_time">
+                {{ item.created_at | relativeTime }}
+              </div>
+              <!-- 阅读 -->
+              <div class="item_read">
+                <i class="iconfont iconicon_liulanliang"></i>
+                {{ item.read }}
+              </div>
+              <!-- 点赞 -->
+              <div class="item_star">
+                <i @click.stop='star(item)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: userInfo && userInfo.starArticles.includes(item.id) }'></i>
+                {{ item.star }}
+              </div>
+            </div>
+          </div>
+          <div class="item_cover">
+            <img :src="baseUrl + item.cover">
+          </div>
         </div>
-        <div class="item_footer">
-          <!-- 时间 -->
-          <div class="item_time">
-            {{ item.created_at | relativeTime }}
-          </div>
-          <!-- 阅读 -->
-          <div class="item_read">
-            <i class="iconfont iconicon_liulanliang"></i>
-            {{ item.read }}
-          </div>
-          <!-- 点赞 -->
-          <div class="item_star">
-            <!-- <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor" :class='{ acvive: isStared(item.behaviors) }'></i> -->
-            <i @click.stop='star(item.id)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: userInfo && userInfo.starArticles.includes(item.id) }'></i>
-            {{ item.star }}
-          </div>
-        </div>
-      </div>
-      <div class="item_cover">
-        <img :src="baseUrl + item.cover">
-      </div>
-    </div>
+      </van-list>
+    </van-pull-refresh>
   </div>
 </template>
 <script>
 import { starArticleByIdApi } from '@/api/find'
-// import eventbus from '@/utils/eventbus'
 import { mapState, mapActions } from 'vuex'
 export default {
   name: '',
@@ -41,11 +51,15 @@ export default {
   },
   data () {
     return {
-      baseUrl: process.env.VUE_APP_BASEURL
+      baseUrl: process.env.VUE_APP_BASEURL,
+      loading: false,
+      finished: false,
+      isLoading: false,
+      disabled: false
     }
   },
   computed: {
-    ...mapState(['userInfo'])
+    ...mapState(['userInfo', 'isLogin'])
   },
   watch: {},
   created () {
@@ -56,27 +70,31 @@ export default {
     toDetail (id) {
       this.$router.push('/technicDetail/' + id)
     },
-    async star (id) {
+    async star (item) {
+      if (!this.isLogin) {
+        this.$toast.fail('您还没有登录哦~')
+        this.$router.push('/login?redirect=' + this.$route.path)
+        return
+      }
       try {
-        const { data: res } = await starArticleByIdApi({ article: id })
-        console.log(res)
-        this.$parent.getTechnicData()
+        const { data: res } = await starArticleByIdApi({ article: item.id })
+        // console.log(res)
+        if (res.data.num === 0) {
+          item.star -= 1
+        } else {
+          item.star += 1
+        }
         this.getUserInfoByVuex()
       } catch (err) {
         console.log(err)
       }
+    },
+    onLoad () {
+      this.$emit('load')
+    },
+    onRefresh () {
+      this.$emit('refresh')
     }
-    // 判断是否被当前用户点赞,将该文章的behavior数组传入即可
-    // isStared (arr) {
-    //   let res = false
-    //   if (arr.length === 0 || !this.userInfo.id) return false
-    //   arr.forEach(item => {
-    //     if (item.type === 'star' && item.user === this.userInfo.id) {
-    //       res = true
-    //     }
-    //   })
-    //   return res
-    // }
   }
 }
 </script>
@@ -87,6 +105,8 @@ export default {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-top: 20px;
+      margin-bottom: 30px;
       .item_left{
         .item_title{
           font-size: 16px;
