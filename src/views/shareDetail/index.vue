@@ -1,80 +1,88 @@
 <template>
-  <div>
-    <back title=''></back>
-    <div class="padding" v-if='detail.title'>
-      <!-- 标题 -->
-      <div class="detail_title">
-        {{ detail.title }}
-      </div>
-      <!-- 用户信息 -->
-      <div class="detail_header">
-        <div class="avatar">
-          <img :src="baseUrl + detail.author.avatar" alt="">
+  <van-skeleton title avatar :row="16" :loading="loading">
+    <div>
+      <back title=''></back>
+      <div class="padding" v-if='detail.title'>
+        <!-- 标题 -->
+        <div class="detail_title">
+          {{ detail.title }}
         </div>
-        <div class="text">
-          <div class="nickname">
-            {{ detail.author.nickname }}
+        <!-- 用户信息 -->
+        <div class="detail_header">
+          <div class="avatar">
+            <img :src="baseUrl + detail.author.avatar" alt="">
           </div>
-          <div class="time">
-            {{ detail.created_at | relativeTime }}
-          </div>
-        </div>
-      </div>
-      <!-- 面经分享内容 -->
-      <div class="detail_content" v-html="detail.content">
-      </div>
-      <!-- 评论部分 -->
-      <div class="comment">
-        <!-- 评论标题 -->
-        <van-badge :content="total">
-          <div class="comment_title">
-            评论
-          </div>
-        </van-badge>
-        <!-- 评论列表 -->
-        <shareComments @load='getMore' @reply='reply' ref='list' :list='commentList'/>
-      </div>
-      <!-- 底部工具栏 -->
-      <div class="footer">
-        <div @click='isCommentInputShow = true' class="input">
-          我来补充两句
-        </div>
-        <div class="tools">
-          <!-- 收藏 -->
-          <div class="tool" @click='collect'>
-            <i class="iconfont iconbtn_shoucang_nor" :class="{ active: userInfo && userInfo.collectArticles.includes(detail.id) }"></i>
-            {{ detail.collect }}
-          </div>
-          <!-- 点赞 -->
-          <div class="tool" @click='star'>
-            <i class="iconfont iconbtn_dianzan_big_nor" :class="{ active: userInfo && userInfo.starArticles.includes(detail.id) }"></i>
-            {{ detail.star }}
-          </div>
-          <!-- 分享 -->
-          <div class="tool" @click='isShareDialogShow = true'>
-            <i class="iconfont iconbtn_share"></i>
-            {{ detail.share }}
+          <div class="text">
+            <div class="nickname">
+              {{ detail.author.nickname }}
+            </div>
+            <div class="time">
+              {{ detail.created_at | relativeTime }}
+            </div>
           </div>
         </div>
+        <!-- 面经分享内容 -->
+        <div class="detail_content" v-html="detail.content">
+        </div>
+        <!-- 评论部分 -->
+        <div class="comment">
+          <!-- 评论标题 -->
+          <van-badge :content="total">
+            <div class="comment_title">
+              评论
+            </div>
+          </van-badge>
+          <!-- 评论列表 -->
+          <shareComments @load='getMore' @reply='reply' ref='list' :list='commentList'/>
+        </div>
+        <!-- 底部工具栏 -->
+        <div class="footer">
+          <div @click='isCommentInputShow = true' class="input">
+            我来补充两句
+          </div>
+          <div class="tools">
+            <!-- 收藏 -->
+            <div class="tool" @click='collect'>
+              <i class="iconfont iconbtn_shoucang_nor" :class="{ active: isActive('collectArticles', detail.id) }"></i>
+              {{ detail.collect }}
+            </div>
+            <!-- 点赞 -->
+            <div class="tool" @click='star'>
+              <i class="iconfont iconbtn_dianzan_big_nor" :class="{ active: isActive('starArticles', detail.id) }"></i>
+              {{ detail.star }}
+            </div>
+            <!-- 分享 -->
+            <div class="tool" @click='isShareDialogShow = true'>
+              <i class="iconfont iconbtn_share"></i>
+              {{ detail.share }}
+            </div>
+          </div>
+        </div>
       </div>
+      <!-- 评论弹出层 -->
+      <van-popup @close='popClose' v-model="isCommentInputShow" round position="bottom" :style="{ height: '30%' }" >
+        <div class="pop">
+          <textarea v-model='commentVal' :placeholder="placeHolderText" type="text" />
+          <div @click='sendComment' class="send">发送</div>
+        </div>
+      </van-popup>
+      <!-- 分享弹出层 -->
+      <van-dialog v-model="isShareDialogShow" title="分享" show-cancel-button>
+        <img :style='{width: "100%", height: "100%"}' src="https://img01.yzcdn.cn/vant/apple-3.jpg" />
+      </van-dialog>
     </div>
-    <!-- 评论弹出层 -->
-    <van-popup @close='popClose' v-model="isCommentInputShow" round position="bottom" :style="{ height: '30%' }" >
-      <div class="pop">
-        <textarea v-model='commentVal' :placeholder="placeHolderText" type="text" />
-        <div @click='sendComment' class="send">发送</div>
-      </div>
-    </van-popup>
-    <!-- 分享弹出层 -->
-    <van-dialog v-model="isShareDialogShow" title="分享" show-cancel-button>
-      <img :style='{width: "100%", height: "100%"}' src="https://img01.yzcdn.cn/vant/apple-3.jpg" />
-    </van-dialog>
-  </div>
+  </van-skeleton>
 </template>
 <script>
 import shareComments from '@/components/shareComments'
 import { getShareDetailApi, getShareCommentApi, sendCommentByIdApi, collectShareApi, starArticleByIdApi } from '@/api/find'
-import { mapState, mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
+import Vue from 'vue'
+import { Skeleton } from 'vant'
+// 引入方法判断用户是否登录
+import isLogin from '@/utils/isLogin.js'
+
+Vue.use(Skeleton)
 export default {
   name: '',
   components: {
@@ -83,6 +91,7 @@ export default {
   props: {},
   data () {
     return {
+      loading: true,
       // 文章详情信息
       detail: {},
       baseUrl: process.env.VUE_APP_BASEURL,
@@ -100,7 +109,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['userInfo', 'isLogin'])
+    ...mapGetters(['isActive'])
   },
   watch: {},
   created () {
@@ -120,6 +129,7 @@ export default {
         if (this.$refs.list) {
           this.$refs.list.loading = false
         }
+        this.loading = false
       } catch (err) {
         console.log(err)
       }
@@ -134,15 +144,6 @@ export default {
         console.log(err)
       }
     },
-    // 验证是否已经登录
-    checkIsLogin () {
-      if (!this.isLogin) {
-        this.$toast.fail('您还没有登录哦~')
-        this.$router.push('/login?redirect=' + this.$route.path)
-        return false
-      }
-    },
-    // 加载更多评论
     getMore () {
       if (this.start + 5 > this.total) {
         this.$refs.list.finished = true
@@ -154,7 +155,7 @@ export default {
     },
     // 发布评论
     async sendComment () {
-      this.checkIsLogin()
+      if (!isLogin()) return
       const val = this.commentVal.trim()
       const queryObj = {
         article: this.$route.params.id,
@@ -182,7 +183,7 @@ export default {
     },
     // 回复评论
     reply (obj) {
-      this.checkIsLogin()
+      if (!isLogin()) return
       const { id, name } = obj
       this.replyId = id
       this.placeHolderText = `回复 ${name}:`
@@ -195,7 +196,7 @@ export default {
     },
     // 收藏
     async collect () {
-      this.checkIsLogin()
+      if (!isLogin()) return
       try {
         const { data: res } = await collectShareApi(this.$route.params.id)
         // console.log(res)
@@ -210,7 +211,7 @@ export default {
       }
     },
     async star () {
-      this.checkIsLogin()
+      if (!isLogin()) return
       try {
         const { data: res } = await starArticleByIdApi({ article: this.$route.params.id })
         // console.log(res)

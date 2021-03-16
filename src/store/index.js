@@ -35,5 +35,12 @@ export default new Vuex.Store({
     }
   },
   modules: {
+  },
+  getters: {
+    isActive (state) {
+      return (prop, id) => {
+        return state.userInfo && state.userInfo[prop].includes(id)
+      }
+    }
   }
 })

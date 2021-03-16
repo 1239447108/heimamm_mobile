@@ -101,12 +101,10 @@ export default {
 <style scoped lang='less'>
   .technic{
     .technic_item{
-      padding: 0 15px;
+      padding: 20px 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 20px;
-      margin-bottom: 30px;
       .item_left{
         .item_title{
           font-size: 16px;

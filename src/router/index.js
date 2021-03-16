@@ -170,6 +170,11 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
+  // 将滚动的距离记录下来
+  from.meta.scrollTop =
+    document.documentElement.scrollTop ||
+    window.pageYOffset ||
+    document.body.scrollTop
   // token
   const token = getToken('hm_m_token')
   // 是否登录
@@ -207,5 +212,9 @@ router.beforeEach(async (to, from, next) => {
   }
   // 不需要登录、已登录或token有效则放行
   next()
+})
+
+router.afterEach((from, to) => {
+  window.scrollTo(0, 0)
 })
 export default router

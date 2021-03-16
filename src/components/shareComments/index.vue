@@ -134,7 +134,7 @@ export default {
           display: flex;
           align-items: center;
           i{
-            font-size: 28px;
+            font-size: 20px;
             margin-left: 5px;
           }
           .active{
@@ -147,6 +147,7 @@ export default {
         font-size: 16px;
         font-family: PingFangSC, PingFangSC-Regular;
         word-break: break-all;
+        word-wrap: break-word;
         color: #181a39;
         line-height: 27px;
       }
@@ -162,6 +163,7 @@ export default {
         .reply{
           margin-top: 10px;
           word-break: break-all;
+          word-wrap: break-word;
           .reply_nickname{
             font-weight: 600;
             margin-right: 10px;

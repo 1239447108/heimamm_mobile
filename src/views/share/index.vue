@@ -6,9 +6,6 @@
       请输入关键字
     </div>
     <shareList :list='shareList' ref='list' @load='getMore' @refresh='refresh' />
-    <div class="nomore">
-      没有更多了
-    </div>
   </div>
 </template>
 <script>

@@ -38,7 +38,7 @@
               </div>
               <!-- 点赞 -->
               <div class="item_star">
-                <i @click.stop='star(item)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: userInfo && userInfo.starArticles.includes(item.id) }'></i>
+                <i @click.stop='star(item)' class="iconfont iconbtn_dianzan_small_nor" :class='{ active: isActive("starArticles", item.id) }'></i>
                 {{ item.star }}
               </div>
             </div>
@@ -50,7 +50,7 @@
 </template>
 <script>
 import { starArticleByIdApi } from '@/api/find'
-import { mapState, mapActions } from 'vuex'
+import { mapState, mapActions, mapGetters } from 'vuex'
 export default {
   name: '',
   components: {},
@@ -67,7 +67,8 @@ export default {
     }
   },
   computed: {
-    ...mapState(['userInfo', 'isLogin'])
+    ...mapState(['userInfo', 'isLogin']),
+    ...mapGetters(['isActive'])
   },
   watch: {},
   created () {},

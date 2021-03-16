@@ -44,6 +44,9 @@ export default {
     this.getShareData()
     this.getHotData()
   },
+  activated () {
+    window.scrollTo(0, this.$route.meta.scrollTop)
+  },
   mounted () {},
   methods: {
     toTechnic () {

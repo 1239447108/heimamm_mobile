@@ -1,5 +1,6 @@
 <template>
-  <div class="detail">
+  <van-skeleton title avatar :row="16" :loading="loading">
+    <div class="detail">
     <back title=''></back>
     <div class="padding" v-if='detail.title'>
       <div class="detail_title">
@@ -22,10 +23,15 @@
 
       </div>
     </div>
-  </div>
+    </div>
+  </van-skeleton>
 </template>
 <script>
 import { getTechnicDetailApi } from '@/api/find'
+import Vue from 'vue'
+import { Skeleton } from 'vant'
+
+Vue.use(Skeleton)
 export default {
   name: '',
   components: {
@@ -33,6 +39,7 @@ export default {
   props: {},
   data () {
     return {
+      loading: true,
       detail: {}
     }
   },
@@ -43,6 +50,7 @@ export default {
       const { data: res } = await getTechnicDetailApi(this.$route.params.id)
       // console.log(res)
       this.detail = res.data
+      this.loading = false
     } catch (err) {
       console.log(err)
     }
