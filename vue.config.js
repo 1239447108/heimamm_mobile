@@ -21,5 +21,17 @@ module.exports = {
         ]
       }
     }
+  },
+  chainWebpack: config => {
+    // 指定入口文件
+    config.entry('app').clear().add('./src/main.js')
+    // 设置cdn
+    config.set('externals', {
+      vue: 'Vue',
+      'vue-router': 'VueRouter',
+      axios: 'axios',
+      vant: 'vant',
+      '@antv/f2': 'F2'
+    })
   }
 }

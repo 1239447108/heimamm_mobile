@@ -4,7 +4,7 @@ import router from './router'
 import store from './store'
 // vant全部引入
 import Vant from 'vant'
-import 'vant/lib/index.css'
+// import 'vant/lib/index.css'
 
 // 引入自制插件
 import myPlugin from '@/utils/plugins/myFirstPlugin'
