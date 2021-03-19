@@ -44,13 +44,13 @@
         </div>
       </div>
       <div id="chart">
+        <div class="bg"></div>
         <van-circle
           v-model="currentRate"
           :rate="rate"
           :speed="100"
           :stroke-width="80"
-          layer-color="#ebedf0"
-          text="颜色定制"
+          layer-color="none"
         >
           <template #default>
             <div class="circle_text">
@@ -58,7 +58,7 @@
                 顺序刷题
               </span>
               <span>
-                70 / 126
+                {{ submit_transition }} / {{ total_transition }}
               </span>
             </div>
           </template>
@@ -88,7 +88,7 @@
         累计收录
       </div>
       <div class="count_num">
-        126
+        {{ total_transition }}
       </div>
     </div>
     <div class="btn">
@@ -98,7 +98,7 @@
 </template>
 <script>
 import { getQuestionFiltersApi } from '@/api/question'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
 export default {
   name: 'question',
   components: {},
@@ -114,12 +114,17 @@ export default {
       cityPositions: [],
       isCityPickerShow: false,
       indexList: [1, 2, 3, 4],
-      currentRate: 0
+      currentRate: 0,
+      total: 0,
+      total_transition: 0,
+      submit: 0,
+      submit_transition: 0
     }
   },
   computed: {
+    ...mapState(['userInfo']),
     rate () {
-      return ((70 / 126) * 100).toFixed(0)
+      return (7 / 126) * 100
     }
   },
   watch: {},
@@ -135,9 +140,23 @@ export default {
         const { data: res } = await getQuestionFiltersApi()
         // console.log(res)
         this.citys = res.data.citys
+        this.total = res.data.totalCount
         this.cityPositions = res.data.cityPositions
         this.positions = this.cityPositions['全国']
         this.positionId = this.positions[0].id
+        this.submit = this.userInfo.correctQuestions.length
+        const timeId1 = setInterval(() => {
+          if (this.total_transition >= this.total) {
+            return clearInterval(timeId1)
+          }
+          this.total_transition++
+        }, 1000 / this.total)
+        const timeId2 = setInterval(() => {
+          if (this.submit_transition >= this.submit) {
+            return clearInterval(timeId2)
+          }
+          this.submit_transition++
+        }, 1000 / this.submit)
       } catch (err) {
         console.log(err)
       }
@@ -174,6 +193,7 @@ export default {
     .scroll_box{
       width: 100%;
       overflow-x: auto;
+      // 去除滚动条
       &::-webkit-scrollbar{
           display: none;
         }
@@ -248,6 +268,10 @@ export default {
         transform: translate(-50%, -50%);
         width: 120px;
         height: 120px;
+        background-image: url('../../assets/circle.png');
+        background-size: 100%;
+        box-sizing: border-box;
+        padding: 10px;
         .van-circle{
           width: 100%;
           height: 100%;
